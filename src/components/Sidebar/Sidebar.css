@@ -1,0 +1,254 @@
+/* Sidebar.css */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 271px;
+  height: 100vh; /* Changed from 1280px to 100vh */
+  background: #FFFFFF;
+  border-right: 1px solid #EAECF0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Outer Layout Container */
+.sidebar-outer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+
+.logo-section {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+}
+
+.sidebar-logo {
+  width: 140px; 
+  height: auto;
+  max-height: 60px;
+  object-fit: contain;
+}
+
+.logo-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Inner Box Layout */
+.sidebar-inner {
+  position: absolute;
+  width: 207px;
+  height: calc(100vh - 200px); 
+  top: 135px;
+  left: 10px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  gap: 25px;
+  overflow-y: auto; /* Add scroll if content is too long */
+}
+
+/* Navigation Menu */
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  text-decoration: none;
+  border-radius: 8px;
+  background: transparent;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: #EFF6FF;
+}
+
+.nav-item.active {
+  background: #155DFC;
+}
+
+/* Navigation Icon */
+.nav-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.nav-icon-fallback {
+  width: 20px;
+  height: 20px;
+  background: #667085;
+  color: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Active state icon styling */
+.nav-item.active .nav-icon {
+  filter: brightness(0) invert(1); /* Makes icon white */
+}
+
+.nav-item.active .nav-icon-fallback {
+  background: white;
+  color: #155DFC;
+}
+
+/* Navigation Label */
+.nav-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  flex: 1;
+  text-align: left;
+}
+
+.nav-item.active .nav-label {
+  color: #FFFFFF;
+}
+
+/* Log Out Section */
+.logout-section {
+  padding: 0 16px;
+  margin-top: auto; 
+}
+
+
+
+
+/* Logout Icon */
+.logout-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.logout-icon-fallback {
+  width: 20px;
+  height: 20px;
+  color: #667085;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.logout-btn:hover .logout-icon {
+  filter: invert(16%) sepia(99%) saturate(4057%) hue-rotate(353deg) brightness(95%) contrast(101%);
+}
+
+/* Logout Label */
+.logout-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  flex: 1;
+  text-align: left;
+}
+
+.logout-btn:hover .logout-label {
+  color: #F04438;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
+  
+  .sidebar-inner {
+    width: 180px;
+    left: 30px;
+  }
+  
+  .sidebar-logo {
+    width: 120px;
+  }
+  
+  .nav-label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-inner {
+    width: 160px;
+    left: 20px;
+  }
+  
+  .sidebar-logo {
+    width: 100px;
+  }
+  
+  .nav-label,
+  .logout-label {
+    display: none;
+  }
+  
+  .nav-item {
+    justify-content: center;
+    padding: 12px;
+  }
+  
+  .logout-btn {
+    justify-content: center;
+    padding: 12px;
+  }
+}

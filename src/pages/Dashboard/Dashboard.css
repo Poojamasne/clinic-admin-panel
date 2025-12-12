@@ -1,0 +1,934 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  margin-left: 271px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  flex: 1;
+  padding: 109px 42px;
+  background: #F4F7FA;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Welcome Section */
+.welcome-section {
+  margin-bottom: 32px;
+}
+
+.welcome-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 32px;
+  line-height: 145%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #000000;
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.welcome-subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 145%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #3F74E2;
+  margin: 0;
+}
+
+/* Stats Cards Container */
+.stats-container {
+  display: flex;
+  gap: 31px;
+  margin-bottom: 32px;
+  width: 1095px;
+  height: 163px;
+}
+
+/* Total Patients Card */
+.total-patients-card {
+  width: 532px;
+  height: 163px;
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 14px 27px;
+  border: 1px solid #EAECF0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1B1F25;
+  margin: 0 0 12px 0;
+}
+
+.card-number {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000000;
+  margin: 0;
+  line-height: 1;
+}
+
+/* SVG Icon Container */
+.card-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  background: #F0FDF4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon img {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.card-icon-fallback {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #16A34A;
+}
+
+/* Today's Patients Card */
+.today-patients-card {
+  width: 532px;
+  height: 163px;
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 14px 27px;
+  border: 1px solid #EAECF0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.today-card-content {
+  flex: 1;
+}
+
+.today-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1B1F25;
+  margin: 0 0 12px 0;
+}
+
+.today-number {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000000;
+  margin: 0;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+/* Main Dashboard Layout - Single Column */
+.dashboard-main {
+  display: block;
+  width: 100%;
+}
+
+/* Left Column - Alerts & Appointments */
+.dashboard-left {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Alerts Section */
+.alerts-section {
+  width: 100%;
+  background: #EFF6FF;
+  border-radius: 8px;
+  border: 1px solid #155DFC;
+  padding: 20px;
+}
+
+.alerts-header {
+  margin-bottom: 20px;
+}
+
+.alerts-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #155DFC;
+  margin: 0;
+}
+
+.alerts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.alert-item:last-child {
+  margin-bottom: 0;
+}
+
+.alert-bullet {
+  font-size: 20px;
+  color: #155DFC;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.alert-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #155DFC;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Appointments Section */
+.appointments-section {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 11px;
+  border: 1px solid #EAECF0;
+  padding: 24px;
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+}
+
+/* Filter Row - Below Appointments Title */
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* APPOINTMENTS SEARCH - Separate from Navbar */
+.appointments-search-container {
+  position: relative;
+  width: 324px;
+  height: 40px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.appointments-search-container:focus-within {
+  border-color: #155DFC;
+  box-shadow: 0 0 0 3px rgba(21, 93, 252, 0.1);
+}
+
+/* Search Icon Wrapper - Left side like navbar */
+.appointments-search-icon-wrapper {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-right: 1px solid transparent;
+  padding: 0 12px;
+}
+
+.appointments-search-svg-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.appointments-search-icon-fallback {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #667085;
+}
+
+.appointments-search-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #344054;
+  background: transparent;
+  padding: 0 16px;
+}
+
+.appointments-search-input::placeholder {
+  color: #667085;
+  opacity: 0.7;
+}
+
+/* Delete Button with SVG */
+.delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+}
+
+
+.delete-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.delete-icon-fallback {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appointments-search-input:focus {
+  border-color: #155DFC;
+  box-shadow: 0 0 0 3px rgba(21, 93, 252, 0.1);
+}
+
+.appointments-search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #667085;
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filter Dropdown Container */
+.filter-dropdown-container {
+  position: relative;
+  min-width: 160px;
+}
+
+.filter-select {
+  width: 100%;
+  height: 40px;
+  padding: 8px 40px 8px 16px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  background: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #344054;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.filter-select:hover {
+  border-color: #9CA3AF;
+}
+
+.filter-select:focus {
+  border-color: #155DFC;
+  box-shadow: 0 0 0 3px rgba(21, 93, 252, 0.1);
+}
+
+/* Table Horizontal Scroll Container */
+.table-horizontal-scroll-container {
+  border: 1px solid #EAECF0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+  border-radius: 8px;
+}
+
+/* Table with Checkboxes */
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1200px;
+}
+
+.appointments-table thead {
+  background: #F9FAFB;
+  border-bottom: 2px solid #EAECF0;
+}
+
+.appointments-table th {
+  text-align: left;
+  padding: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #667085;
+  white-space: nowrap;
+  border-bottom: 1px solid #EAECF0;
+  background: #F9FAFB;
+}
+
+.appointments-table th:first-child {
+  width: 60px;
+  text-align: center;
+  padding-left: 20px;
+  position: sticky;
+  left: 0;
+  background: #F9FAFB;
+  z-index: 20;
+}
+
+.appointments-table th:nth-child(2) {
+  width: 15%;
+  min-width: 180px;
+}
+
+.appointments-table th:nth-child(3) {
+  width: 12%;
+  min-width: 150px;
+}
+
+.appointments-table th:nth-child(4) {
+  width: 10%;
+  min-width: 120px;
+}
+
+.appointments-table th:nth-child(5) {
+  width: 8%;
+  min-width: 100px;
+}
+
+.appointments-table th:nth-child(6) {
+  width: 15%;
+  min-width: 160px;
+}
+
+.appointments-table th:nth-child(7) {
+  width: 10%;
+  min-width: 130px;
+}
+
+.appointments-table th:nth-child(8) {
+  width: 10%;
+  min-width: 120px;
+}
+
+.appointments-table th:nth-child(9) {
+  width: 15%;
+  min-width: 160px;
+}
+
+.appointments-table tbody tr {
+  border-bottom: 1px solid #F0F0F0;
+  background: #FFFFFF;
+  transition: background-color 0.2s ease;
+}
+
+.appointments-table tbody tr:hover {
+  background: #F9FAFB;
+}
+
+.appointments-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.appointments-table td {
+  padding: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #344054;
+  vertical-align: middle;
+  border-bottom: 1px solid #EAECF0;
+  white-space: nowrap;
+}
+
+.appointments-table td:first-child {
+  text-align: center;
+  padding-left: 20px;
+  position: sticky;
+  left: 0;
+  background: #FFFFFF;
+  z-index: 5;
+}
+
+.appointments-table tbody tr:hover td:first-child {
+  background: #F9FAFB;
+}
+
+/* Checkbox Styling */
+.checkbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #D0D5DD;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #FFFFFF;
+}
+
+.custom-checkbox:hover {
+  border-color: #9CA3AF;
+}
+
+.custom-checkbox.checked {
+  background: #155DFC;
+  border-color: #155DFC;
+}
+
+.checkmark {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  display: none;
+}
+
+.custom-checkbox.checked .checkmark {
+  display: contents;
+}
+
+/* Patient Info */
+.patient-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-name {
+  font-weight: 500;
+  color: #344054;
+  margin-bottom: 4px;
+}
+
+.patient-email {
+  font-size: 12px;
+  color: #667085;
+}
+
+/* Status Badge */
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+  border: 1px solid transparent;
+}
+
+.status-confirmed {
+  
+  color: #1DCB14;
+}
+
+.status-pending {
+  color: #EA8E00;
+
+}
+
+.status-cancelled {
+ 
+  color: #FC4141;
+ 
+}
+
+.status-completed {
+  
+  color: #0369A1;
+  
+}
+
+/* Actions Container */
+.actions-container {
+  display: flex;
+  gap: 8px;
+}
+
+
+
+.view-btn {
+  background: #E0F2FE;
+  color: #0369A1;
+  border-color: #7DD3FC;
+}
+
+.view-btn:hover {
+  background: #BAE6FD;
+}
+
+.edit-btn {
+  background: #DCFCE7;
+  color: #15803D;
+  border-color: #86EFAC;
+}
+
+.edit-btn:hover {
+  background: #BBF7D0;
+}
+
+/* Pagination Footer */
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #EAECF0;
+}
+
+.pagination-info {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #667085;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn {
+  min-width: auto;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid #D0D5DD;
+  border-radius: 6px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: #344054;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.pagination-btn.active {
+  background: #155DFC;
+  border-color: #155DFC;
+  color: #FFFFFF;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+  color: #667085;
+  padding: 0 4px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+}
+
+/* Update Sidebar.css for fixed position */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 271px;
+  height: 100vh;
+  background: #FFFFFF;
+  border-right: 1px solid #EAECF0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Update Navbar.css for fixed position */
+.navbar {
+  width: calc(100vw - 271px);
+  height: 79px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 42px;
+  padding-left: 37px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #EAECF0;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 271px;
+  z-index: 900;
+  box-sizing: border-box;
+}
+
+/* Custom horizontal scrollbar for table */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .stats-container {
+    width: 100%;
+  }
+  
+  .total-patients-card,
+  .today-patients-card {
+    width: 100%;
+    max-width: 532px;
+  }
+  
+  .appointments-search-container {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .main-content {
+    margin-left: 240px;
+  }
+  
+  .dashboard-content {
+    padding: 100px 24px 24px 24px;
+  }
+  
+  .stats-container {
+    flex-direction: column;
+    height: auto;
+    gap: 24px;
+  }
+  
+  .total-patients-card,
+  .today-patients-card {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .appointments-search-container,
+  .filter-dropdown-container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .table-footer {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .actions-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100vw;
+  }
+  
+  .dashboard-content {
+    padding: 90px 16px 16px 16px;
+  }
+  
+  .welcome-title {
+    font-size: 24px;
+  }
+  
+  .total-patients-card,
+  .today-patients-card {
+    padding: 16px;
+    height: 140px;
+  }
+  
+  .pagination-controls {
+    flex-wrap: wrap;
+  }
+  
+  .pagination-btn {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-icon,
+  .today-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .card-icon img,
+  .today-card-icon img {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .status-badge {
+    min-width: 80px;
+    font-size: 11px;
+    padding: 4px 12px;
+  }
+  
+  .action-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+}
+
+/* Custom scrollbar for dashboard content */
+.dashboard-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

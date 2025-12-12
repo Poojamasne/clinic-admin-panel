@@ -1,0 +1,308 @@
+/* Navbar.css */
+.navbar {
+  width: 1169px;
+  height: 79px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 42px;
+  padding-left: 37px;
+  gap: 130px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #EAECF0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Search Section */
+.search-section {
+  flex: 1;
+}
+
+.search-container {
+  width: 478px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid #D0D5DD;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.search-container:focus-within {
+  border-color: #155DFC;
+  box-shadow: 0 0 0 3px rgba(21, 93, 252, 0.1);
+}
+
+/* Search Icon Wrapper */
+.search-icon-wrapper {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-right: 1px solid transparent;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.search-icon-fallback {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #667085;
+}
+
+/* Search Input */
+.search-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #181717;
+  background: transparent;
+  padding: 0 16px;
+}
+
+.search-input::placeholder {
+  color: #667085;
+  opacity: 0.7;
+}
+
+/* Right Section - Contains Bell, Admin Text, Profile Photo */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Notification Icon */
+.notification-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-icon:hover {
+  background: #F9FAFB;
+}
+
+.bell-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.bell-fallback {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: #F04438;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Admin Text - Name & Role */
+.admin-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 8px 0;
+}
+
+.admin-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  margin: 0;
+  line-height: 1.4;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.admin-role {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #667085;
+  margin: 0;
+  line-height: 1.4;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Profile Photo - Last element on far right */
+.profile-photo {
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.photo-fallback {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .navbar {
+    width: 100%;
+    padding-right: 24px;
+    padding-left: 24px;
+    gap: 60px;
+  }
+  
+  .search-container {
+    width: 400px;
+  }
+  
+  .right-section {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .navbar {
+    padding-right: 20px;
+    padding-left: 20px;
+    gap: 40px;
+  }
+  
+  .search-container {
+    width: 350px;
+  }
+  
+  .right-section {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 64px;
+    padding-right: 16px;
+    padding-left: 16px;
+    gap: 20px;
+  }
+  
+  .search-container {
+    width: 200px;
+    height: 36px;
+  }
+  
+  .search-icon-wrapper {
+    width: 36px;
+  }
+  
+  .search-input {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+  
+  .right-section {
+    gap: 16px;
+  }
+  
+  .admin-text {
+    display: none;
+  }
+  
+  .notification-icon {
+    padding: 6px;
+  }
+  
+  .bell-icon,
+  .bell-fallback {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+  
+  .profile-image,
+  .photo-fallback {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-container {
+    width: 150px;
+  }
+  
+  .search-input::placeholder {
+    font-size: 12px;
+  }
+  
+  .right-section {
+    gap: 12px;
+  }
+  
+  .notification-icon {
+    padding: 4px;
+  }
+  
+  .notification-badge {
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+    top: 2px;
+    right: 2px;
+  }
+}
