@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState('admin@clinic.com');
   const [password, setPassword] = useState('');
@@ -31,7 +32,7 @@ const Login: React.FC = () => {
         {/* Logo Section */}
         <div className="logo-wrapper">
           <img 
-            src="/logo.svg" 
+            src="./Logo.svg" 
             alt="Nirmal Health Care" 
             className="login-logo"
           />
