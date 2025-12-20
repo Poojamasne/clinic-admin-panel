@@ -1,88 +1,106 @@
-import React, { useState } from 'react';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import './Testimonials.css';
+import React, { useState } from "react";
+import Sidebar from "../../components/Sidebar/Sidebar";
+import "./Testimonials.css";
 
 const Testimonials: React.FC = () => {
   const [checkedRows, setCheckedRows] = useState<number[]>([0, 2, 4]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTestimonial, setNewTestimonial] = useState({
-    firstName: '',
-    lastName: '',
-    feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-    photo: null as File | null
+    firstName: "",
+    lastName: "",
+    feedback:
+      "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+    photo: null as File | null,
   });
-  
+  const [sortConfig, setSortConfig] = useState<{
+    column: string;
+    order: "asc" | "desc" | null;
+  }>({
+    column: "clientName",
+    order: null,
+  });
+
   const totalPages = 10;
 
   const testimonials = [
-    { 
+    {
       id: 1,
-      clientName: 'Riya Patil',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user1.jpg'
+      clientName: "Riya Patil",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user1.jpg",
     },
-    { 
+    {
       id: 2,
-      clientName: 'Rajesh Patil',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user2.jpg'
+      clientName: "Rajesh Patil",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user2.jpg",
     },
-    { 
+    {
       id: 3,
-      clientName: 'Rakesh Shetty',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user3.jpg'
+      clientName: "Rakesh Shetty",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user3.jpg",
     },
-    { 
+    {
       id: 4,
-      clientName: 'Kiran More',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user4.jpg'
+      clientName: "Kiran More",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user4.jpg",
     },
-    { 
+    {
       id: 5,
-      clientName: 'Sunita Shah',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user5.jpg'
+      clientName: "Sunita Shah",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user5.jpg",
     },
-    { 
+    {
       id: 6,
-      clientName: 'Riya Patil',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user1.jpg'
+      clientName: "Riya Patil",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user1.jpg",
     },
-    { 
+    {
       id: 7,
-      clientName: 'Rajesh Patil',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user2.jpg'
+      clientName: "Rajesh Patil",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user2.jpg",
     },
-    { 
+    {
       id: 8,
-      clientName: 'Rakesh Shetty',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user3.jpg'
+      clientName: "Rakesh Shetty",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user3.jpg",
     },
-    { 
+    {
       id: 9,
-      clientName: 'Kiran More',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user4.jpg'
+      clientName: "Kiran More",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user4.jpg",
     },
-    { 
+    {
       id: 10,
-      clientName: 'Sunita Shah',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: '/user5.jpg'
-    }
+      clientName: "Sunita Shah",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: "/user5.jpg",
+    },
   ];
 
   const handleCheckboxChange = (index: number) => {
-    setCheckedRows(prev => {
+    setCheckedRows((prev) => {
       if (prev.includes(index)) {
-        return prev.filter(i => i !== index);
+        return prev.filter((i) => i !== index);
       } else {
         return [...prev, index];
       }
@@ -114,44 +132,79 @@ const Testimonials: React.FC = () => {
   const handleCloseAddModal = () => {
     setShowAddModal(false);
     setNewTestimonial({
-      firstName: '',
-      lastName: '',
-      feedback: 'The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!',
-      photo: null
+      firstName: "",
+      lastName: "",
+      feedback:
+        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      photo: null,
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setNewTestimonial(prev => ({
+    setNewTestimonial((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setNewTestimonial(prev => ({
+      setNewTestimonial((prev) => ({
         ...prev,
-        photo: e.target.files![0]
+        photo: e.target.files![0],
       }));
     }
   };
 
   const handleSubmitTestimonial = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('New testimonial:', newTestimonial);
+    console.log("New testimonial:", newTestimonial);
     // Here you would typically send the data to your backend
     handleCloseAddModal();
   };
 
+  const handleSort = (column: string) => {
+    setSortConfig((prev) => {
+      if (prev.column === column) {
+        // If clicking same column, cycle through asc → desc → null
+        if (prev.order === "asc") return { column, order: "desc" };
+        if (prev.order === "desc") return { column, order: null };
+        return { column, order: "asc" };
+      } else {
+        // New column, start with asc
+        return { column, order: "asc" };
+      }
+    });
+  };
+
   // Filter testimonials based on search query
-  const filteredTestimonials = testimonials.filter(testimonial => {
-    const matchesSearch = 
-      testimonial.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredTestimonials = testimonials.filter((testimonial) => {
+    const matchesSearch =
+      testimonial.clientName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       testimonial.feedback.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesSearch;
+  });
+
+  // Sort testimonials based on sortConfig
+  const sortedTestimonials = [...filteredTestimonials].sort((a, b) => {
+    if (!sortConfig.order) return 0;
+
+    const aValue = a[sortConfig.column as keyof typeof a];
+    const bValue = b[sortConfig.column as keyof typeof b];
+
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortConfig.order === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+
+    return 0;
   });
 
   return (
@@ -159,7 +212,6 @@ const Testimonials: React.FC = () => {
       <Sidebar />
       <div className="main-content">
         <div className="testimonials-content">
-          
           {/* Header Section */}
           <div className="testimonials-header-section">
             <div className="testimonials-header">
@@ -173,26 +225,26 @@ const Testimonials: React.FC = () => {
           {/* Testimonials Table Section */}
           <div className="testimonials-table-section">
             <div className="table-section-header">
-              
               {/* Filter Row */}
               <div className="filter-row">
                 <div className="testimonials-search-container">
                   <div className="testimonials-search-icon-wrapper">
-                    <img 
-                      src="/search.svg" 
+                    <img
+                      src="/search.svg"
                       alt="Search"
                       className="testimonials-search-svg-icon"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const fallback = document.createElement('div');
-                        fallback.className = 'testimonials-search-icon-fallback';
-                        fallback.textContent = '🔍';
+                        target.style.display = "none";
+                        const fallback = document.createElement("div");
+                        fallback.className =
+                          "testimonials-search-icon-fallback";
+                        fallback.textContent = "🔍";
                         target.parentNode?.appendChild(fallback);
                       }}
                     />
                   </div>
-                  
+
                   <input
                     type="text"
                     placeholder="Search"
@@ -201,8 +253,11 @@ const Testimonials: React.FC = () => {
                     onChange={handleSearchChange}
                   />
                 </div>
-                
-                <button className="add-testimonial-btn-inline" onClick={handleOpenAddModal}>
+
+                <button
+                  className="add-testimonial-btn-inline"
+                  onClick={handleOpenAddModal}
+                >
                   Add Testimonial
                 </button>
               </div>
@@ -215,84 +270,146 @@ const Testimonials: React.FC = () => {
                     <tr>
                       <th>
                         <div className="checkbox-header">
-                          <div 
-                            className={`custom-checkbox ${checkedRows.length === testimonials.length ? 'checked' : ''}`}
+                          <div
+                            className={`custom-checkbox ${
+                              checkedRows.length === testimonials.length
+                                ? "checked"
+                                : ""
+                            }`}
                             onClick={handleSelectAll}
                           >
                             <span className="checkmark">✓</span>
                           </div>
                         </div>
                       </th>
-                      <th>Client Name</th>
+                      {/* Client Name Column Header - Updated with sorting */}
+                      <th>
+                        <div
+                          className="patient-column-header"
+                          onClick={() => handleSort("clientName")}
+                        >
+                          <span className="header-text">Client Name</span>
+                          <span className="sort-icons">
+                            <img
+                              src="./sort-asc.svg"
+                              alt="Asc"
+                              className={`sort-icon ${
+                                sortConfig.column === "clientName" &&
+                                sortConfig.order === "asc"
+                                  ? "active"
+                                  : ""
+                              }`}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                                const fallback = document.createElement("span");
+                                fallback.textContent = "↑";
+                                target.parentNode?.appendChild(fallback);
+                              }}
+                            />
+                            <img
+                              src="./sort-desc.svg"
+                              alt="Desc"
+                              className={`sort-icon ${
+                                sortConfig.column === "clientName" &&
+                                sortConfig.order === "desc"
+                                  ? "active"
+                                  : ""
+                              }`}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                                const fallback = document.createElement("span");
+                                fallback.textContent = "↓";
+                                target.parentNode?.appendChild(fallback);
+                              }}
+                            />
+                          </span>
+                        </div>
+                      </th>
                       <th>Client feedback</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredTestimonials.map((testimonial, index) => (
-                      <tr key={testimonial.id}>
-                        <td>
-                          <div className="checkbox-cell">
-                            <div 
-                              className={`custom-checkbox ${checkedRows.includes(index) ? 'checked' : ''}`}
-                              onClick={() => handleCheckboxChange(index)}
-                            >
-                              <span className="checkmark">✓</span>
+                    {sortedTestimonials.map(
+                      (
+                        testimonial,
+                        index // Change filteredTestimonials to sortedTestimonials
+                      ) => (
+                        <tr key={testimonial.id}>
+                          <td>
+                            <div className="checkbox-cell">
+                              <div
+                                className={`custom-checkbox ${
+                                  checkedRows.includes(index) ? "checked" : ""
+                                }`}
+                                onClick={() => handleCheckboxChange(index)}
+                              >
+                                <span className="checkmark">✓</span>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="client-info">
-                            <div className="client-avatar">
-                              {testimonial.photo ? (
-                                <img 
-                                  src={testimonial.photo} 
-                                  alt={testimonial.clientName}
-                                  className="client-photo"
+                          </td>
+                          <td>
+                            <div className="client-info">
+                              <div className="client-avatar">
+                                {testimonial.photo ? (
+                                  <img
+                                    src={testimonial.photo}
+                                    alt={testimonial.clientName}
+                                    className="client-photo"
+                                    onError={(e) => {
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      target.style.display = "none";
+                                      const fallback =
+                                        document.createElement("div");
+                                      fallback.className =
+                                        "client-photo-fallback";
+                                      fallback.textContent =
+                                        testimonial.clientName.charAt(0);
+                                      target.parentNode?.appendChild(fallback);
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="client-photo-fallback">
+                                    {testimonial.clientName.charAt(0)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="client-name">
+                                {testimonial.clientName}
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="feedback-text">
+                              "{testimonial.feedback}"
+                            </div>
+                          </td>
+                          <td>
+                            <div className="testimonial-actions-container">
+                              <button className="delete-btn" title="Delete">
+                                <img
+                                  src="/delete.svg"
+                                  alt="Delete"
+                                  className="delete-icon"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    const fallback = document.createElement('div');
-                                    fallback.className = 'client-photo-fallback';
-                                    fallback.textContent = testimonial.clientName.charAt(0);
+                                    target.style.display = "none";
+                                    const fallback =
+                                      document.createElement("span");
+                                    fallback.className = "delete-icon-fallback";
+                                    fallback.textContent = "🗑️";
                                     target.parentNode?.appendChild(fallback);
                                   }}
                                 />
-                              ) : (
-                                <div className="client-photo-fallback">
-                                  {testimonial.clientName.charAt(0)}
-                                </div>
-                              )}
+                              </button>
                             </div>
-                            <div className="client-name">{testimonial.clientName}</div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="feedback-text">
-                            "{testimonial.feedback}"
-                          </div>
-                        </td>
-                        <td>
-                          <div className="testimonial-actions-container">
-                            <button className="delete-btn" title="Delete">
-                              <img 
-                                src="/delete.svg" 
-                                alt="Delete"
-                                className="delete-icon"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const fallback = document.createElement('span');
-                                  fallback.className = 'delete-icon-fallback';
-                                  fallback.textContent = '🗑️';
-                                  target.parentNode?.appendChild(fallback);
-                                }}
-                              />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      )
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -300,43 +417,49 @@ const Testimonials: React.FC = () => {
 
             {/* Table Footer */}
             <div className="table-footer">
-              <div className="pagination-info">
-                Showing 1 - 10 out of 233
-              </div>
+              <div className="pagination-info">Showing 1 - 10 out of 233</div>
               <div className="pagination-controls">
-                <button 
+                <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
                   ← Previous
                 </button>
-                <button 
-                  className={`pagination-btn ${currentPage === 1 ? 'active' : ''}`}
+                <button
+                  className={`pagination-btn ${
+                    currentPage === 1 ? "active" : ""
+                  }`}
                   onClick={() => handlePageChange(1)}
                 >
                   1
                 </button>
-                <button 
-                  className={`pagination-btn ${currentPage === 2 ? 'active' : ''}`}
+                <button
+                  className={`pagination-btn ${
+                    currentPage === 2 ? "active" : ""
+                  }`}
                   onClick={() => handlePageChange(2)}
                 >
                   2
                 </button>
                 <span className="pagination-ellipsis">...</span>
-                <button 
-                  className={`pagination-btn ${currentPage === 9 ? 'active' : ''}`}
+                <button
+                  className={`pagination-btn ${
+                    currentPage === 9 ? "active" : ""
+                  }`}
                   onClick={() => handlePageChange(9)}
                 >
                   9
                 </button>
-                <button 
-                  className={`pagination-btn ${currentPage === 10 ? 'active' : ''}`}
+                <button
+                  className={`pagination-btn ${
+                    currentPage === 10 ? "active" : ""
+                  }`}
                   onClick={() => handlePageChange(10)}
                 >
                   10
                 </button>
-                <button 
+                <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
@@ -359,9 +482,9 @@ const Testimonials: React.FC = () => {
                 ✕
               </button>
             </div>
-            
+
             <div className="modal-subtitle">Add Client Testimonials</div>
-            
+
             <form onSubmit={handleSubmitTestimonial}>
               <div className="type-section">
                 <div className="upload-label">Upload Photo</div>
@@ -379,12 +502,14 @@ const Testimonials: React.FC = () => {
                       <span className="upload-text">Upload Photo</span>
                     </label>
                     {newTestimonial.photo && (
-                      <div className="file-name">{newTestimonial.photo.name}</div>
+                      <div className="file-name">
+                        {newTestimonial.photo.name}
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
-              
+
               <div className="name-section">
                 <div className="name-label">Client Name</div>
                 <div className="name-fields">
@@ -412,7 +537,7 @@ const Testimonials: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="feedback-section">
                 <div className="feedback-label">Client feedback</div>
                 <textarea
@@ -424,9 +549,13 @@ const Testimonials: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={handleCloseAddModal}>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={handleCloseAddModal}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="submit-btn">

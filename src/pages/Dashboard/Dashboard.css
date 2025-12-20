@@ -1609,3 +1609,25 @@
     align-items: flex-start;
   }
 }
+
+.patient-column-header {
+  display: flex;
+  justify-content: space-between; /* pushes icons to the right */
+  align-items: center;            /* vertically centers text and icons */
+  cursor: pointer;
+}
+
+.sort-icons {
+  display: flex;
+  flex-direction: column;
+}
+
+.sort-icon {
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+}
+
+.header-text {
+  flex-shrink: 0; /* ensures text doesn't shrink */
+}

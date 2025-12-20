@@ -37,9 +37,6 @@ const Login: React.FC = () => {
             className="login-logo"
           />
         </div>
-
-        {/* Title Section */}
-        <h1 className="login-title">Sign in</h1>
         
         {/* Subtitle */}
         <p className="login-subtitle">
@@ -99,17 +96,13 @@ const Login: React.FC = () => {
           {/* Remember Me & Forgot Password */}
           <div className="form-options">
             <div className="remember-me">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <label htmlFor="rememberMe">Remember me</label>
+              
+
+
+              
+              
             </div>
-            <Link to="/forgot-password" className="forgot-password">
-              Forgot Password?
-            </Link>
+            
           </div>
 
           {/* Sign In Button */}
