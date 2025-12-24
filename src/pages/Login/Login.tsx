@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login } from '../../apis/admin';
-import './Login.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { login } from "../../apis/admin";
+import "./Login.css";
 
 const Login: React.FC = () => {
   // Hardcoded admin credentials for testing
-  const [email, setEmail] = useState('admin@clinic.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState("admin@clinic.com");
+  const [password, setPassword] = useState("admin123");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     // Development mode: Bypass API for testing (set to true to enable)
@@ -23,19 +23,19 @@ const Login: React.FC = () => {
     if (DEV_MODE_BYPASS) {
       // Hardcoded mock response for development
       const mockAdminData = {
-        id: 'dev-admin-id',
-        name: 'Admin User',
+        id: "dev-admin-id",
+        name: "Admin User",
         email: email,
-        role: 'admin',
-        is_active: 1
+        role: "admin",
+        is_active: 1,
       };
-      const mockToken = 'dev-mock-token-' + Date.now();
-      
-      localStorage.setItem('adminToken', mockToken);
-      localStorage.setItem('adminData', JSON.stringify(mockAdminData));
-      
+      const mockToken = "dev-mock-token-" + Date.now();
+
+      localStorage.setItem("adminToken", mockToken);
+      localStorage.setItem("adminData", JSON.stringify(mockAdminData));
+
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate("/dashboard");
         setIsLoading(false);
       }, 500);
       return;
@@ -46,18 +46,17 @@ const Login: React.FC = () => {
 
       if (result.success) {
         // Token and admin data are already stored by the login API function
-        navigate('/dashboard');
+        navigate("/dashboard");
       } else {
-        setError(result.message || 'Login failed');
+        setError(result.message || "Login failed");
       }
     } catch (error: any) {
-      console.error('Login error:', error);
-      setError(error.message || 'Something went wrong. Please try again.');
+      console.error("Login error:", error);
+      setError(error.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -66,33 +65,21 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-frame">
-        
-       
         <div className="logo-wrapper">
-          <img 
-            src="./Logo.svg" 
-            alt="Nirmal Health Care" 
+          <img
+            src="./Logo.svg"
+            alt="Nirmal Health Care"
             className="login-logo"
           />
         </div>
-        
-        
-        <p className="login-subtitle">
-          Sign in to manage your clinic
-        </p>
 
-       
+        <p className="login-subtitle">Sign in to manage your clinic</p>
+
         <form className="login-form" onSubmit={handleSubmit}>
-          
-       
           <div className="form-group">
             <label className="form-label">Email Address</label>
             <div className="input-with-icon">
-              <img 
-                src="/email-icon.svg" 
-                alt="Email" 
-                className="input-icon"
-              />
+              <img src="/email-icon.svg" alt="Email" className="input-icon" />
               <input
                 type="email"
                 className="form-input"
@@ -104,13 +91,12 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          
           <div className="form-group">
             <label className="form-label">Password</label>
             <div className="input-with-icon">
-              <img 
-                src="/password-icon.svg" 
-                alt="Password" 
+              <img
+                src="/password-icon.svg"
+                alt="Password"
                 className="input-icon"
               />
               <input
@@ -126,41 +112,31 @@ const Login: React.FC = () => {
                 alt={showPassword ? "Hide password" : "Show password"}
                 className="eye-icon"
                 onClick={togglePasswordVisibility}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               />
             </div>
           </div>
 
-        
           <div className="form-options">
-            <div className="remember-me">
-              
-
-
-              
-              
-            </div>
-            
+            <div className="remember-me"></div>
           </div>
 
-          
           {error && (
-            <div className="error-message" style={{ 
-              color: '#ff4444', 
-              marginBottom: '1rem', 
-              fontSize: '0.875rem',
-              textAlign: 'center'
-            }}>
+            <div
+              className="error-message"
+              style={{
+                color: "#ff4444",
+                marginBottom: "1rem",
+                fontSize: "0.875rem",
+                textAlign: "center",
+              }}
+            >
               {error}
             </div>
           )}
-          
-          <button 
-            type="submit" 
-            className="signin-button"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign in'}
+
+          <button type="submit" className="signin-button" disabled={isLoading}>
+            {isLoading ? "Signing in..." : "Sign in"}
           </button>
         </form>
       </div>
