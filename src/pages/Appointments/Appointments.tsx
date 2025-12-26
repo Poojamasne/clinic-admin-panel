@@ -68,7 +68,7 @@ const Appointments: React.FC = () => {
   // ];
 
   // Status options for dropdown
-  const statusOptions = ["All Status", "Confirmed", "Pending"];
+  const statusOptions = ["All Status", "Tentative", "Confirmed"];
 
   // Date filter options
   const dateFilterOptions = [

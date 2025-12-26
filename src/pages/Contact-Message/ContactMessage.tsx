@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getAllContacts, getContactById, markAsRead, updateContactStatus, getUnreadCount, deleteContact } from "../../apis/contacts";
+import { formatDateTimeIST } from "../../utils/dateUtils";
 import "./ContactMessage.css";
 
 // Import SVG icons from assets
@@ -52,18 +53,8 @@ const ContactMessage: React.FC = () => {
           // Map API response to frontend format
           const mappedData = Array.isArray(result.data.contacts)
             ? result.data.contacts.map((item: any) => {
-                // Parse date and time from createdAt
-                const createdAt = new Date(item.createdAt);
-                const dateStr = createdAt.toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric'
-                });
-                const timeStr = createdAt.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true
-                });
+                // Convert UTC timestamp to IST before formatting
+                const { date: dateStr, time: timeStr } = formatDateTimeIST(item.createdAt);
 
                 return {
                   id: item.id,
@@ -285,18 +276,8 @@ const ContactMessage: React.FC = () => {
       const result = await getContactById(message.id);
       if (result.success && result.data) {
         const contact = result.data.contact;
-        // Map to frontend format
-        const createdAt = new Date(contact.createdAt);
-        const dateStr = createdAt.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-        const timeStr = createdAt.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        });
+        // Convert UTC timestamp to IST before formatting
+        const { date: dateStr, time: timeStr } = formatDateTimeIST(contact.createdAt);
 
         const mappedContact = {
           id: contact.id,

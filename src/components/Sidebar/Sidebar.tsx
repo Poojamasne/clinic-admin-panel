@@ -1,81 +1,78 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { logout } from '../../apis/admin';
-import './Sidebar.css';
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { logout } from "../../apis/admin";
+import logo from "../../assets/logo/Group 1686550958.svg";
+import "./Sidebar.css";
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose = () => {} }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  isOpen = false,
+  onClose = () => {},
+}) => {
   const navigate = useNavigate();
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
       await logout();
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       // Navigate to login even if API call fails
-      navigate('/login');
+      navigate("/login");
     }
   };
 
   const menuItems = [
     {
-      name: 'Dashboard',
-      path: '/dashboard',
-      icon: '/dashboard.svg'
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: "/dashboard.svg",
     },
     {
-      name: 'Appointments',
-      path: '/appointments',
-      icon: '/appointments.svg'
+      name: "Appointments",
+      path: "/appointments",
+      icon: "/appointments.svg",
     },
     {
-      name: 'Contact Message',
-      path: '/contact-message',
-      icon: '/contact-message.svg'
+      name: "Contact Message",
+      path: "/contact-message",
+      icon: "/contact-message.svg",
     },
     {
-      name: 'Testimonial',
-      path: '/testimonial',
-      icon: '/treatments.svg'
+      name: "Testimonial",
+      path: "/testimonial",
+      icon: "/treatments.svg",
     },
     {
       name: "Log Out",
       path: "/login",
       icon: "/logout.svg",
-      isLogout: true
-    }
+      isLogout: true,
+    },
   ];
 
   return (
-    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+    <aside className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="sidebar-outer">
         <div className="logo-section">
-          <img 
-            src="/logo.svg" 
-            alt="Nirmal Health Care" 
-            className="sidebar-logo"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const fallback = document.createElement('div');
-              fallback.className = 'logo-fallback';
-              fallback.innerHTML = `
-                <div style="font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; color: #344054; margin-bottom: 4px;">
-                  Admin Dashboard
-                </div>
-                <div style="font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 400; color: #667085;">
-                  Home Health Care
-                </div>
-              `;
-              target.parentNode?.appendChild(fallback);
-            }}
-          />
+          <NavLink to="/dashboard" className="logo-container" onClick={onClose}>
+            <img
+              src={logo}
+              alt="Nirmal Health Care"
+              className="sidebar-logo"
+              onError={(e) => {
+                console.error("Logo failed to load:", logo);
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+              }}
+            />
+            <span className="logo-text">Nirmal Health Care</span>
+          </NavLink>
         </div>
 
         <div className="sidebar-inner">
@@ -90,18 +87,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose = () => {} })
                       handleLogout(e);
                       onClose();
                     }}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                   >
                     <div className="nav-icon-wrapper">
-                      <img 
-                        src={item.icon} 
+                      <img
+                        src={item.icon}
                         alt={item.name}
                         className="nav-icon"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          const fallback = document.createElement('div');
-                          fallback.className = 'nav-icon-fallback';
+                          target.style.display = "none";
+                          const fallback = document.createElement("div");
+                          fallback.className = "nav-icon-fallback";
                           fallback.textContent = item.name.charAt(0);
                           target.parentNode?.appendChild(fallback);
                         }}
@@ -111,26 +108,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose = () => {} })
                   </div>
                 );
               }
-              
+
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `nav-item ${isActive ? 'active' : ''}`
+                    `nav-item ${isActive ? "active" : ""}`
                   }
                   onClick={onClose}
                 >
                   <div className="nav-icon-wrapper">
-                    <img 
-                      src={item.icon} 
+                    <img
+                      src={item.icon}
                       alt={item.name}
                       className="nav-icon"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const fallback = document.createElement('div');
-                        fallback.className = 'nav-icon-fallback';
+                        target.style.display = "none";
+                        const fallback = document.createElement("div");
+                        fallback.className = "nav-icon-fallback";
                         fallback.textContent = item.name.charAt(0);
                         target.parentNode?.appendChild(fallback);
                       }}

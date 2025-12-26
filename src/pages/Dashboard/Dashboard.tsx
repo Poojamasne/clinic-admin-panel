@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getAllAppointments, getAppointmentStats, getTodayAppointments, deleteAppointment } from "../../apis/appointments";
+import { getUnreadCount } from "../../apis/contacts";
 import "./Dashboard.css";
 
 const Dashboard: React.FC = () => {
@@ -27,6 +28,46 @@ const Dashboard: React.FC = () => {
   const [totalPatients, setTotalPatients] = useState(0);
   const [todayPatients, setTodayPatients] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [todayAppointmentsCount, setTodayAppointmentsCount] = useState(0);
+  const [tomorrowAppointmentsCount, setTomorrowAppointmentsCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
+  // Fetch alerts data (today's appointments, tomorrow's appointments, unread messages)
+  useEffect(() => {
+    const fetchAlertsData = async () => {
+      try {
+        // Fetch today's appointments count
+        const todayResult = await getAllAppointments({
+          page: 1,
+          limit: 1,
+          date_filter: "today",
+        });
+        if (todayResult.success && todayResult.data?.pagination) {
+          setTodayAppointmentsCount(todayResult.data.pagination.total || 0);
+        }
+
+        // Fetch tomorrow's appointments count
+        const tomorrowResult = await getAllAppointments({
+          page: 1,
+          limit: 1,
+          date_filter: "tomorrow",
+        });
+        if (tomorrowResult.success && tomorrowResult.data?.pagination) {
+          setTomorrowAppointmentsCount(tomorrowResult.data.pagination.total || 0);
+        }
+
+        // Fetch unread messages count
+        const unreadResult = await getUnreadCount();
+        if (unreadResult.success && unreadResult.data?.unread_count !== undefined) {
+          setUnreadMessagesCount(unreadResult.data.unread_count || 0);
+        }
+      } catch (error: any) {
+        console.error("Alerts data fetch error:", error);
+      }
+    };
+
+    fetchAlertsData();
+  }, []);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -155,14 +196,27 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  const alerts = [
-    "Dr. Yogita Darda has 3 back-to-back appointments today",
-    "2 patients waiting for prescription refill approval",
-    "Lab results ready for 5 patients",
-  ];
+  // Generate dynamic alerts based on fetched data
+  const alerts = React.useMemo(() => {
+    const alertList: string[] = [];
+    
+    if (todayAppointmentsCount > 0) {
+      alertList.push(`Today you have ${todayAppointmentsCount} ${todayAppointmentsCount === 1 ? 'appointment' : 'appointments'}`);
+    }
+    
+    if (tomorrowAppointmentsCount > 0) {
+      alertList.push(`You have ${tomorrowAppointmentsCount} ${tomorrowAppointmentsCount === 1 ? 'appointment' : 'appointments'} scheduled for tomorrow`);
+    }
+    
+    if (unreadMessagesCount > 0) {
+      alertList.push(`You have ${unreadMessagesCount} ${unreadMessagesCount === 1 ? 'unread message' : 'unread messages'}`);
+    }
+    
+    return alertList;
+  }, [todayAppointmentsCount, tomorrowAppointmentsCount, unreadMessagesCount]);
 
   // Status options for dropdown
-  const statusOptions = ["All Status", "Confirmed", "Pending", "Cancelled"];
+  const statusOptions = ["All Status", "Tentative", "Confirmed"];
 
   // Date filter options
   const dateFilterOptions = [
@@ -482,12 +536,20 @@ const Dashboard: React.FC = () => {
                   <h2 className="alerts-title">Alerts & Notifications</h2>
                 </div>
                 <ul className="alerts-list">
-                  {alerts.map((alert, index) => (
-                    <li key={index} className="alert-item">
-                      <span className="alert-bullet">•</span>
-                      <p className="alert-text">{alert}</p>
+                  {alerts.length > 0 ? (
+                    alerts.map((alert, index) => (
+                      <li key={index} className="alert-item">
+                        <span className="alert-bullet">•</span>
+                        <p className="alert-text">{alert}</p>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="alert-item">
+                      <p className="alert-text" style={{ fontStyle: 'italic', color: '#667085' }}>
+                        No alerts at this time
+                      </p>
                     </li>
-                  ))}
+                  )}
                 </ul>
               </div>
 
