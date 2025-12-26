@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import Sidebar from "../../components/Sidebar/Sidebar";
-
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { getAllAppointments, getAppointmentStats, getTodayAppointments, deleteAppointment } from "../../apis/appointments";
 import "./Dashboard.css";
 
 const Dashboard: React.FC = () => {
@@ -8,8 +8,11 @@ const Dashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [timeFilter, setTimeFilter] = useState<string>("Last Week"); // New state for time filter
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false); // State for dropdown visibility
+  const [dateFilter, setDateFilter] = useState<string>("today");
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const [customDate, setCustomDate] = useState<string>("");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
   const [sortConfig, setSortConfig] = useState<{
     column: string;
     order: "asc" | "desc" | null;
@@ -18,9 +21,88 @@ const Dashboard: React.FC = () => {
     order: null,
   });
 
-  const totalPages = 10;
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalAppointments, setTotalAppointments] = useState(0);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [todayPatients, setTodayPatients] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const appointments = [
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch stats
+        const statsResult = await getAppointmentStats();
+        if (statsResult.success && statsResult.data?.stats) {
+          const stats = statsResult.data.stats;
+          setTotalPatients(stats.total || 0);
+          setTodayPatients(stats.today || 0);
+        }
+
+        // Build date filter params
+        const dateFilterParams: any = {
+          date_filter: dateFilter,
+        };
+
+        if (dateFilter === "custom_date" && customDate) {
+          dateFilterParams.date = customDate;
+        } else if (dateFilter === "custom_range" && fromDate && toDate) {
+          dateFilterParams.from_date = fromDate;
+          dateFilterParams.to_date = toDate;
+        }
+
+        // Fetch appointments with date filter
+        const appointmentsResult = await getAllAppointments({
+          page: currentPage,
+          limit: 20,
+          status: statusFilter !== "All Status" ? statusFilter.toLowerCase() : "",
+          search: searchQuery,
+          sort_by: 'date',
+          sort_order: 'DESC',
+          ...dateFilterParams,
+        });
+
+        // Process appointments result
+        if (appointmentsResult && appointmentsResult.success && appointmentsResult.data) {
+          const mappedData = Array.isArray(appointmentsResult.data.appointments)
+            ? appointmentsResult.data.appointments.map((item: any) => ({
+                id: item.id,
+                patient: item.name,
+                email: item.email,
+                doctor: "Dr. Nitin Darda", // Default doctor name
+                date: item.date,
+                time: item.time,
+                type: item.service,
+                phone: item.phone,
+                status: item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Pending",
+              }))
+            : [];
+
+          setAppointments(mappedData);
+          
+          if (appointmentsResult.data.pagination) {
+            setTotalPages(appointmentsResult.data.pagination.totalPages || 1);
+            setTotalAppointments(appointmentsResult.data.pagination.total || 0);
+          }
+        }
+      } catch (error: any) {
+        console.error("Dashboard API error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Debounce search to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      fetchDashboardData();
+    }, searchQuery ? 500 : 0); // 500ms delay for search, immediate for page/filter changes
+
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, statusFilter, searchQuery, dateFilter, customDate, fromDate, toDate]);
+
+  const oldAppointments = [
     {
       patient: "Riya Patil",
       email: "riya.p@sumago.com",
@@ -82,7 +164,20 @@ const Dashboard: React.FC = () => {
   // Status options for dropdown
   const statusOptions = ["All Status", "Confirmed", "Pending", "Cancelled"];
 
-  const timeOptions = ["Last Week", "Last Month", "Last Year"];
+  // Date filter options
+  const dateFilterOptions = [
+    { value: "all", label: "All Time" },
+    { value: "today", label: "Today" },
+    { value: "tomorrow", label: "Tomorrow" },
+    { value: "yesterday", label: "Yesterday" },
+    { value: "this_week", label: "This Week" },
+    { value: "last_week", label: "Last Week" },
+    { value: "this_month", label: "This Month" },
+    { value: "last_month", label: "Last Month" },
+    { value: "this_year", label: "This Year" },
+    { value: "custom_date", label: "Custom Date" },
+    { value: "custom_range", label: "Custom Range" },
+  ];
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRows((prev) => {
@@ -108,6 +203,30 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteAppointment = async (id: string, index: number) => {
+    if (!window.confirm("Are you sure you want to delete this appointment?")) {
+      return;
+    }
+
+    try {
+      const result = await deleteAppointment(id);
+      if (result.success) {
+        // Remove from local state
+        setAppointments((prev) => prev.filter((app) => app.id !== id));
+        // Remove from checked rows if present
+        setCheckedRows((prev) => prev.filter((i) => i !== index));
+        // Update total count
+        setTotalAppointments((prev) => Math.max(0, prev - 1));
+        toast.success("Appointment deleted successfully!");
+      } else {
+        toast.error(result.message || "Failed to delete appointment");
+      }
+    } catch (error: any) {
+      console.error("Delete appointment error:", error);
+      toast.error(error.message || "Failed to delete appointment");
+    }
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -118,9 +237,19 @@ const Dashboard: React.FC = () => {
     setStatusFilter(e.target.value);
   };
 
-  const handleTimeFilterChange = (option: string) => {
-    setTimeFilter(option);
-    setShowTimeDropdown(false);
+  const handleDateFilterChange = (value: string) => {
+    setDateFilter(value);
+    setShowDateDropdown(false);
+    // Reset custom date inputs when filter changes
+    if (value !== "custom_date") {
+      setCustomDate("");
+    }
+    if (value !== "custom_range") {
+      setFromDate("");
+      setToDate("");
+    }
+    // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
   const handleSort = (column: string) => {
@@ -170,7 +299,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <Sidebar />
       <div className="main-content">
         <div className="dashboard-content">
           {/* Welcome Section with Time Filter */}
@@ -185,7 +313,7 @@ const Dashboard: React.FC = () => {
               <div className="time-filter-container">
                 <button
                   className="time-filter-btn"
-                  onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                  onClick={() => setShowDateDropdown(!showDateDropdown)}
                 >
                   <div className="time-filter-content">
                     <img
@@ -201,26 +329,96 @@ const Dashboard: React.FC = () => {
                         target.parentNode?.appendChild(fallback);
                       }}
                     />
-                    <span className="time-filter-text">{timeFilter}</span>
+                    <span className="time-filter-text">
+                      {dateFilterOptions.find((opt) => opt.value === dateFilter)?.label || "Today"}
+                    </span>
                     <span className="dropdown-arrow">▼</span>
                   </div>
                 </button>
-                {showTimeDropdown && (
+                {showDateDropdown && (
                   <div className="time-filter-dropdown">
-                    {timeOptions.map((option) => (
+                    {dateFilterOptions.map((option) => (
                       <button
-                        key={option}
+                        key={option.value}
                         className={`time-filter-option ${
-                          timeFilter === option ? "selected" : ""
+                          dateFilter === option.value ? "selected" : ""
                         }`}
-                        onClick={() => handleTimeFilterChange(option)}
+                        onClick={() => handleDateFilterChange(option.value)}
                       >
-                        {option}
+                        {option.label}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+              {/* Custom Date Input */}
+              {dateFilter === "custom_date" && (
+                <div style={{ marginTop: "10px", marginLeft: "20px" }}>
+                  <input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => setCustomDate(e.target.value)}
+                    style={{
+                      padding: "8px",
+                      borderRadius: "4px",
+                      border: "1px solid #ddd",
+                      fontSize: "14px",
+                    }}
+                  />
+                </div>
+              )}
+              {/* Custom Range Inputs */}
+              {dateFilter === "custom_range" && (
+                <div style={{ marginTop: "10px", marginLeft: "20px", display: "flex", gap: "10px" }}>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "12px" }}>
+                      From:
+                    </label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => {
+                        const newFromDate = e.target.value;
+                        setFromDate(newFromDate);
+                        // Validate: from_date should not be greater than to_date
+                        if (toDate && newFromDate > toDate) {
+                          toast.error("From date cannot be greater than To date");
+                        }
+                      }}
+                      style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "12px" }}>
+                      To:
+                    </label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => {
+                        const newToDate = e.target.value;
+                        setToDate(newToDate);
+                        // Validate: to_date should not be less than from_date
+                        if (fromDate && newToDate < fromDate) {
+                          toast.error("To date cannot be less than From date");
+                        }
+                      }}
+                      min={fromDate || undefined}
+                      style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -230,7 +428,7 @@ const Dashboard: React.FC = () => {
             <div className="total-patients-card">
               <div className="card-content">
                 <h3 className="card-title">Total Patients</h3>
-                <h2 className="card-number">1,204</h2>
+                <h2 className="card-number">{totalPatients.toLocaleString()}</h2>
               </div>
               <div className="card-icon">
                 <img
@@ -252,7 +450,7 @@ const Dashboard: React.FC = () => {
             <div className="today-patients-card">
               <div className="today-card-content">
                 <h3 className="today-title">Today's Patients</h3>
-                <h2 className="today-number">24</h2>
+                <h2 className="today-number">{todayPatients}</h2>
               </div>
               <div className="today-card-icon">
                 <img
@@ -604,12 +802,21 @@ const Dashboard: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sortedAppointments.map(
-                          (
-                            appointment,
-                            index // Change this line
-                          ) => (
-                            <tr key={index}>
+                        {isLoading ? (
+                          <tr>
+                            <td colSpan={9} style={{ textAlign: "center", padding: "2rem" }}>
+                              Loading appointments...
+                            </td>
+                          </tr>
+                        ) : sortedAppointments.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} style={{ textAlign: "center", padding: "2rem" }}>
+                              No appointments found
+                            </td>
+                          </tr>
+                        ) : (
+                          sortedAppointments.map((appointment, index) => (
+                            <tr key={appointment.id || index}>
                               <td>
                                 <div className="checkbox-cell">
                                   <div
@@ -653,7 +860,9 @@ const Dashboard: React.FC = () => {
                                     alt="Delete"
                                     className="delete-action-icon"
                                     onClick={() => {
-                                      console.log("Delete appointment", index);
+                                      if (appointment.id) {
+                                        handleDeleteAppointment(appointment.id, index);
+                                      }
                                     }}
                                     onError={(e) => {
                                       const target =
@@ -670,7 +879,7 @@ const Dashboard: React.FC = () => {
                                 </div>
                               </td>
                             </tr>
-                          )
+                          ))
                         )}
                       </tbody>
                     </table>
@@ -680,53 +889,59 @@ const Dashboard: React.FC = () => {
                 {/* Table Footer */}
                 <div className="table-footer">
                   <div className="pagination-info">
-                    Showing 1 - 10 out of 233
+                    Showing {appointments.length > 0 ? (currentPage - 1) * 20 + 1 : 0} - {Math.min(currentPage * 20, totalAppointments)} out of {totalAppointments}
                   </div>
                   <div className="pagination-controls">
                     <button
                       className="pagination-btn"
                       onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
+                      disabled={currentPage === 1 || isLoading}
                     >
                       ← Previous
                     </button>
-                    <button
-                      className={`pagination-btn ${
-                        currentPage === 1 ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(1)}
-                    >
-                      1
-                    </button>
-                    <button
-                      className={`pagination-btn ${
-                        currentPage === 2 ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(2)}
-                    >
-                      2
-                    </button>
-                    <span className="pagination-ellipsis">...</span>
-                    <button
-                      className={`pagination-btn ${
-                        currentPage === 9 ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(9)}
-                    >
-                      9
-                    </button>
-                    <button
-                      className={`pagination-btn ${
-                        currentPage === 10 ? "active" : ""
-                      }`}
-                      onClick={() => handlePageChange(10)}
-                    >
-                      10
-                    </button>
+                    {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                      let pageNum: number;
+                      if (totalPages <= 10) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 4) {
+                        pageNum = totalPages - 9 + i;
+                      } else {
+                        pageNum = currentPage - 4 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          className={`pagination-btn ${
+                            currentPage === pageNum ? "active" : ""
+                          }`}
+                          onClick={() => handlePageChange(pageNum)}
+                          disabled={isLoading}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                    {totalPages > 10 && currentPage < totalPages - 4 && (
+                      <span className="pagination-ellipsis">...</span>
+                    )}
+                    {totalPages > 10 && currentPage < totalPages - 4 && (
+                      <button
+                        className={`pagination-btn ${
+                          currentPage === totalPages ? "active" : ""
+                        }`}
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={isLoading}
+                      >
+                        {totalPages}
+                      </button>
+                    )}
                     <button
                       className="pagination-btn"
                       onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
+                      disabled={currentPage === totalPages || isLoading}
                     >
                       Next →
                     </button>

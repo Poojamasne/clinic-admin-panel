@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { getAllContacts, getContactById, markAsRead, updateContactStatus, getUnreadCount, deleteContact } from "../../apis/contacts";
 import "./ContactMessage.css";
 
 // Import SVG icons from assets
@@ -11,13 +13,18 @@ import TimeIcon from "../../assets/Appointment/time.svg";
 import DateIcon from "../../assets/Appointment/calendar.svg";
 
 const ContactMessage: React.FC = () => {
-  const [checkedRows, setCheckedRows] = useState<number[]>([0, 2, 4]);
+  const [checkedRows, setCheckedRows] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [timeFilter, setTimeFilter] = useState<string>("Last Week");
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const [dateFilter, setDateFilter] = useState<string>("");
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalContacts, setTotalContacts] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const [sortConfig, setSortConfig] = useState<{
     column: string;
@@ -27,9 +34,96 @@ const ContactMessage: React.FC = () => {
     order: null,
   });
 
-  const totalPages = 10;
+  // Fetch contacts from API with debounced search
+  useEffect(() => {
+    const fetchContacts = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getAllContacts({
+          page: currentPage,
+          limit: 20,
+          search: searchQuery,
+          date_filter: dateFilter || undefined,
+          sort_by: 'createdAt',
+          sort_order: 'DESC'
+        });
 
-  const messages = [
+        if (result.success && result.data) {
+          // Map API response to frontend format
+          const mappedData = Array.isArray(result.data.contacts)
+            ? result.data.contacts.map((item: any) => {
+                // Parse date and time from createdAt
+                const createdAt = new Date(item.createdAt);
+                const dateStr = createdAt.toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric'
+                });
+                const timeStr = createdAt.toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                });
+
+                return {
+                  id: item.id,
+                  patient: item.name,
+                  email: item.email,
+                  phone: item.phone,
+                  subject: item.subject,
+                  message: item.message,
+                  date: dateStr,
+                  time: timeStr,
+                  status: item.status || 'unread',
+                  responded: item.responded || 0,
+                  createdAt: item.createdAt,
+                };
+              })
+            : [];
+
+          setMessages(mappedData);
+
+          // Update pagination
+          if (result.data.pagination) {
+            setTotalPages(result.data.pagination.totalPages || 1);
+            setTotalContacts(result.data.pagination.total || 0);
+          }
+        }
+      } catch (error: any) {
+        console.error("Contacts API error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Debounce search to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      fetchContacts();
+    }, searchQuery ? 500 : 0); // 500ms delay for search, immediate for page changes
+
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, searchQuery, dateFilter]);
+
+  // Fetch unread count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const result = await getUnreadCount();
+        if (result.success && result.data) {
+          setUnreadCount(result.data.unread_count || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+
+    fetchUnreadCount();
+    // Refresh unread count every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const oldMessages = [
     {
       id: 1,
       patient: "Riya Patil",
@@ -142,8 +236,14 @@ const ContactMessage: React.FC = () => {
     },
   ];
 
-  // Time filter options
-  const timeOptions = ["Last Week", "Last Month", "Last Year"];
+  // Date filter options with display labels
+  const dateFilterOptions = [
+    { value: "", label: "All Time" },
+    { value: "today", label: "Today" },
+    { value: "yesterday", label: "Yesterday" },
+    { value: "this_month", label: "This Month" },
+    { value: "this_year", label: "This Year" }
+  ];
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRows((prev) => {
@@ -173,14 +273,69 @@ const ContactMessage: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
-  const handleTimeFilterChange = (option: string) => {
-    setTimeFilter(option);
-    setShowTimeDropdown(false);
+  const handleDateFilterChange = (value: string) => {
+    setDateFilter(value);
+    setShowDateDropdown(false);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
-  const handleViewDetails = (message: any) => {
-    setSelectedMessage(message);
-    setShowDetails(true);
+  const handleViewDetails = async (message: any) => {
+    try {
+      // Fetch full contact details from API
+      const result = await getContactById(message.id);
+      if (result.success && result.data) {
+        const contact = result.data.contact;
+        // Map to frontend format
+        const createdAt = new Date(contact.createdAt);
+        const dateStr = createdAt.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const timeStr = createdAt.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+
+        const mappedContact = {
+          id: contact.id,
+          patient: contact.name,
+          email: contact.email,
+          phone: contact.phone,
+          subject: contact.subject,
+          message: contact.message,
+          date: dateStr,
+          time: timeStr,
+          status: contact.status || 'unread',
+          responded: contact.responded || 0,
+        };
+
+        setSelectedMessage(mappedContact);
+        setShowDetails(true);
+
+        // Mark as read if unread
+        if (contact.status === 'unread') {
+          try {
+            await markAsRead(contact.id);
+            // Update local state
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === contact.id ? { ...msg, status: 'read' } : msg
+              )
+            );
+            setUnreadCount((prev) => Math.max(0, prev - 1));
+          } catch (error) {
+            console.error("Error marking as read:", error);
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error("Error fetching contact details:", error);
+      // Fallback to using the message from list
+      setSelectedMessage(message);
+      setShowDetails(true);
+    }
   };
 
   const handleCloseDetails = () => {
@@ -188,9 +343,62 @@ const ContactMessage: React.FC = () => {
     setSelectedMessage(null);
   };
 
-  const handleDeleteMessage = (id: number) => {
-    console.log("Delete message with id:", id);
-    alert(`Message ${id} deleted!`);
+  const handleDeleteMessage = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this contact message?")) {
+      return;
+    }
+
+    try {
+      // Actually delete the contact using the delete endpoint
+      const result = await deleteContact(id);
+      if (result.success) {
+        // Remove from local state
+        setMessages((prev) => prev.filter((msg) => msg.id !== id));
+        // Remove from checked rows
+        setCheckedRows((prev) => prev.filter((i) => i < messages.length && messages[i]?.id !== id));
+        // Update total count
+        setTotalContacts((prev) => Math.max(0, prev - 1));
+        toast.success("Contact message deleted successfully!");
+      } else {
+        toast.error(result.message || "Failed to delete contact message");
+      }
+    } catch (error: any) {
+      console.error("Delete contact error:", error);
+      toast.error(error.message || "Failed to delete contact message");
+    }
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const result = await markAsRead(id);
+      if (result.success) {
+        // Update local state
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === id ? { ...msg, status: 'read' } : msg
+          )
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error: any) {
+      console.error("Error marking as read:", error);
+    }
+  };
+
+  const handleMarkAsResponded = async (id: string) => {
+    try {
+      const result = await updateContactStatus(id, { responded: true });
+      if (result.success) {
+        // Update local state
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === id ? { ...msg, responded: 1 } : msg
+          )
+        );
+      }
+    } catch (error: any) {
+      console.error("Error marking as responded:", error);
+    }
   };
 
   const handleSort = (column: string) => {
@@ -207,19 +415,8 @@ const ContactMessage: React.FC = () => {
     });
   };
 
-  // Filter messages based on search query and time filter
-  const filteredMessages = messages.filter((message) => {
-    const matchesSearch =
-      message.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      message.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      message.phone.includes(searchQuery) ||
-      message.subject.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesSearch;
-  });
-
-  // Sort messages based on sortConfig
-  const sortedMessages = [...filteredMessages].sort((a, b) => {
+  // Sort messages based on sortConfig (client-side sorting for now)
+  const sortedMessages = [...messages].sort((a, b) => {
     if (!sortConfig.order) return 0;
 
     const aValue = a[sortConfig.column as keyof typeof a];
@@ -281,11 +478,11 @@ const ContactMessage: React.FC = () => {
                   />
                 </div>
 
-                {/* Time Filter Button with Calendar Icon - Right side of search */}
+                {/* Date Filter Button with Calendar Icon - Right side of search */}
                 <div className="time-filter-container">
                   <button
                     className="time-filter-btn"
-                    onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                    onClick={() => setShowDateDropdown(!showDateDropdown)}
                   >
                     <div className="time-filter-content">
                       <img
@@ -301,21 +498,23 @@ const ContactMessage: React.FC = () => {
                           target.parentNode?.appendChild(fallback);
                         }}
                       />
-                      <span className="time-filter-text">{timeFilter}</span>
+                      <span className="time-filter-text">
+                        {dateFilterOptions.find(opt => opt.value === dateFilter)?.label || "All Time"}
+                      </span>
                       <span className="dropdown-arrow">▼</span>
                     </div>
                   </button>
-                  {showTimeDropdown && (
+                  {showDateDropdown && (
                     <div className="time-filter-dropdown">
-                      {timeOptions.map((option) => (
+                      {dateFilterOptions.map((option) => (
                         <button
-                          key={option}
+                          key={option.value}
                           className={`time-filter-option ${
-                            timeFilter === option ? "selected" : ""
+                            dateFilter === option.value ? "selected" : ""
                           }`}
-                          onClick={() => handleTimeFilterChange(option)}
+                          onClick={() => handleDateFilterChange(option.value)}
                         >
-                          {option}
+                          {option.label}
                         </button>
                       ))}
                     </div>
@@ -662,11 +861,20 @@ const ContactMessage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedMessages.map(
-                      (
-                        message,
-                        index // Change filteredMessages to sortedMessages
-                      ) => (
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={9} style={{ textAlign: "center", padding: "2rem" }}>
+                          Loading contacts...
+                        </td>
+                      </tr>
+                    ) : sortedMessages.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} style={{ textAlign: "center", padding: "2rem" }}>
+                          No contact messages found
+                        </td>
+                      </tr>
+                    ) : (
+                      sortedMessages.map((message, index) => (
                         <tr key={message.id} className="table-row">
                           <td className="table-cell">
                             <div className="checkbox-cell">
@@ -706,9 +914,9 @@ const ContactMessage: React.FC = () => {
                           </td>
                           <td className="table-cell message-cell">
                             <div className="message-preview">
-                              {message.message.length > 50
+                              {message.message && message.message.length > 50
                                 ? `${message.message.substring(0, 50)}...`
-                                : message.message}
+                                : message.message || ""}
                             </div>
                           </td>
                           <td className="table-cell actions-cell">
@@ -756,7 +964,7 @@ const ContactMessage: React.FC = () => {
                             </div>
                           </td>
                         </tr>
-                      )
+                      ))
                     )}
                   </tbody>
                 </table>
@@ -765,52 +973,65 @@ const ContactMessage: React.FC = () => {
 
             {/* Table Footer */}
             <div className="table-footer">
-              <div className="pagination-info">Showing 1 - 10 out of 233</div>
+              <div className="pagination-info">
+                Showing {messages.length > 0 ? (currentPage - 1) * 20 + 1 : 0} - {Math.min(currentPage * 20, totalContacts)} out of {totalContacts}
+                {unreadCount > 0 && (
+                  <span style={{ marginLeft: "1rem", color: "#ff4444", fontWeight: "bold" }}>
+                    ({unreadCount} unread)
+                  </span>
+                )}
+              </div>
               <div className="pagination-controls">
                 <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || isLoading}
                 >
                   ← Previous
                 </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 1 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(1)}
-                >
-                  1
-                </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 2 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(2)}
-                >
-                  2
-                </button>
-                <span className="pagination-ellipsis">...</span>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 9 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(9)}
-                >
-                  9
-                </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 10 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(10)}
-                >
-                  10
-                </button>
+                {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 10) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 4) {
+                    pageNum = totalPages - 9 + i;
+                  } else {
+                    pageNum = currentPage - 4 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      className={`pagination-btn ${
+                        currentPage === pageNum ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(pageNum)}
+                      disabled={isLoading}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                {totalPages > 10 && currentPage < totalPages - 4 && (
+                  <span className="pagination-ellipsis">...</span>
+                )}
+                {totalPages > 10 && currentPage < totalPages - 4 && (
+                  <button
+                    className={`pagination-btn ${
+                      currentPage === totalPages ? "active" : ""
+                    }`}
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={isLoading}
+                  >
+                    {totalPages}
+                  </button>
+                )}
                 <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || isLoading}
                 >
                   Next →
                 </button>

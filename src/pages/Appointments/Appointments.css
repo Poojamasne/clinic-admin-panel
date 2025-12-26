@@ -12,19 +12,20 @@
   font-family: 'Poppins', sans-serif;
 }
 
-
+/* Main Content - Layout.css handles margin-left for desktop */
 .main-content {
   flex: 1;
-  margin-left: 271px;
+  margin-left: 0; /* Layout.css handles desktop margin */
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
 }
 
 
 .appointments-content {
   flex: 1;
-  padding: 54px 42px;
+  padding: 24px 42px 42px 42px; /* Reduced top padding for professional spacing */
   background: #F4F7FA;
   overflow-y: auto;
   width: 100%;
@@ -601,12 +602,10 @@
 }
 
 @media (max-width: 1200px) {
-  .main-content {
-    margin-left: 240px;
-  }
+  /* Layout.css handles margin-left, no need to set it here */
   
   .appointments-content {
-    padding: 100px 24px 24px 24px;
+    padding: 24px 24px 24px 24px; /* Professional spacing */
   }
   
   .filter-row {
@@ -626,12 +625,10 @@
 }
 
 @media (max-width: 992px) {
-  .main-content {
-    margin-left: 200px;
-  }
+  /* Layout.css handles margin-left, no need to set it here */
   
   .appointments-content {
-    padding: 90px 20px 20px 20px;
+    padding: 24px 20px 20px 20px; /* Professional spacing */
   }
   
   .appointments-title {
@@ -659,7 +656,7 @@
   }
   
   .appointments-content {
-    padding: 80px 16px 16px 16px;
+    padding: 24px 16px 16px 16px; /* Professional spacing */
   }
   
   .appointments-title {
@@ -714,7 +711,7 @@
 
 @media (max-width: 576px) {
   .appointments-content {
-    padding: 70px 12px 12px 12px;
+    padding: 4px 12px 12px 12px;
   }
   
   .appointments-title {

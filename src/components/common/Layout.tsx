@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isAuthenticated, verifyToken } from '../../apis/admin';
 import Sidebar from '../Sidebar/Sidebar';
 import Navbar from '../Navbar/Navbar';
 import './Layout.css';
@@ -9,6 +11,29 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Check if user is authenticated
+      if (!isAuthenticated()) {
+        navigate('/login');
+        return;
+      }
+
+      // Verify token with backend
+      try {
+        await verifyToken();
+        setIsVerifying(false);
+      } catch (error) {
+        console.error('Token verification failed:', error);
+        navigate('/login');
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -18,11 +43,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setSidebarOpen(false);
   };
 
+  // Show loading state while verifying authentication
+  if (isVerifying) {
+    return (
+      <div className="admin-layout" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-layout">
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
       <div className="main-layout-content">
-        <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+        <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen}  />
         <main className="page-content">
           {children}
         </main>

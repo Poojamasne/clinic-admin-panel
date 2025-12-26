@@ -1,5 +1,6 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { logout } from '../../apis/admin';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -8,6 +9,20 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose = () => {} }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Navigate to login even if API call fails
+      navigate('/login');
+    }
+  };
+
   const menuItems = [
     {
       name: 'Dashboard',
@@ -32,7 +47,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose = () => {} })
     {
       name: "Log Out",
       path: "/login",
-      icon: "/logout.svg"
+      icon: "/logout.svg",
+      isLogout: true
     }
   ];
 
@@ -64,33 +80,66 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose = () => {} })
 
         <div className="sidebar-inner">
           <nav className="nav-menu">
-            {menuItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `nav-item ${isActive ? 'active' : ''}`
-                }
-                onClick={onClose}
-              >
-                <div className="nav-icon-wrapper">
-                  <img 
-                    src={item.icon} 
-                    alt={item.name}
-                    className="nav-icon"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const fallback = document.createElement('div');
-                      fallback.className = 'nav-icon-fallback';
-                      fallback.textContent = item.name.charAt(0);
-                      target.parentNode?.appendChild(fallback);
+            {menuItems.map((item) => {
+              if (item.isLogout) {
+                return (
+                  <div
+                    key={item.path}
+                    className="nav-item"
+                    onClick={(e) => {
+                      handleLogout(e);
+                      onClose();
                     }}
-                  />
-                </div>
-                <span className="nav-label">{item.name}</span>
-              </NavLink>
-            ))}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="nav-icon-wrapper">
+                      <img 
+                        src={item.icon} 
+                        alt={item.name}
+                        className="nav-icon"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const fallback = document.createElement('div');
+                          fallback.className = 'nav-icon-fallback';
+                          fallback.textContent = item.name.charAt(0);
+                          target.parentNode?.appendChild(fallback);
+                        }}
+                      />
+                    </div>
+                    <span className="nav-label">{item.name}</span>
+                  </div>
+                );
+              }
+              
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `nav-item ${isActive ? 'active' : ''}`
+                  }
+                  onClick={onClose}
+                >
+                  <div className="nav-icon-wrapper">
+                    <img 
+                      src={item.icon} 
+                      alt={item.name}
+                      className="nav-icon"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.className = 'nav-icon-fallback';
+                        fallback.textContent = item.name.charAt(0);
+                        target.parentNode?.appendChild(fallback);
+                      }}
+                    />
+                  </div>
+                  <span className="nav-label">{item.name}</span>
+                </NavLink>
+              );
+            })}
           </nav>
         </div>
       </div>

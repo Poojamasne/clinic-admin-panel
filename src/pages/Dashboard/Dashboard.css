@@ -13,20 +13,46 @@
   overflow: hidden;
 }
 
-/* Main Content Area */
+/* Main Content Area - Layout.css handles margin-left for desktop */
 .main-content {
   flex: 1;
-  margin-left: 271px;
+  margin-left: 0; /* Layout.css handles desktop margin */
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  width: 100%;
+}
+
+/* Tablet/iPad and Mobile (≤1024px) - Remove margin for overlay sidebar */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    display: block; /* Remove flex layout */
+  }
+  
+  .main-content {
+    margin-left: 0 !important; /* No margin on tablet/mobile */
+    width: 100% !important; /* Full width */
+    flex: none;
+  }
+}
+
+/* Desktop (≥1025px) - Layout.css handles margin */
+@media (min-width: 1025px) {
+  .dashboard-container {
+    display: flex;
+  }
+  
+  /* Layout.css handles margin-left: 271px via .main-layout-content */
+  .main-content {
+    margin-left: 0;
+  }
 }
 
 /* Dashboard Content */
 .dashboard-content {
   flex: 1;
-  padding: 54px 42px;
+  padding: 24px 42px 42px 42px; /* Reduced top padding for professional spacing */
   background: #F4F7FA;
   overflow-y: auto;
   overflow-x: hidden;
@@ -773,39 +799,10 @@
   align-items: center;
 }
 
-/* Update Sidebar.css for fixed position */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 271px;
-  height: 100vh;
-  background: #FFFFFF;
-  border-right: 1px solid #EAECF0;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-/* Update Navbar.css for fixed position */
-.navbar {
-  width: calc(100vw - 271px);
-  height: 79px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 42px;
-  padding-left: 37px;
-  background: #FFFFFF;
-  border-bottom: 1px solid #EAECF0;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 271px;
-  z-index: 900;
-  box-sizing: border-box;
-}
+/* Note: Sidebar and Navbar styles are defined in their respective component CSS files */
+/* These duplicate styles are removed to prevent conflicts */
+/* Sidebar: src/components/Sidebar/Sidebar.css */
+/* Navbar: src/components/Navbar/Navbar.css */
 
 /* Custom horizontal scrollbar for table */
 .table-wrapper::-webkit-scrollbar {
@@ -1009,13 +1006,11 @@
   }
 }
 
-@media (max-width: 1200px) {
-  .main-content {
-    margin-left: 240px;
-  }
+@media (max-width: 1200px) and (min-width: 1025px) {
+  /* Layout.css handles margin-left, no need to set it here */
   
   .dashboard-content {
-    padding: 100px 24px 24px 24px;
+    padding: 24px 24px 24px 24px; /* Professional spacing */
   }
   
   .stats-container {
@@ -1048,6 +1043,22 @@
 }
 
 @media (max-width: 1024px) {
+  /* Tablet/iPad: Remove all margins for overlay sidebar */
+  .dashboard-container {
+    display: block;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Override navbar positioning on tablet */
+  .navbar {
+    left: 0 !important;
+    width: 100% !important;
+  }
+  
   .table-footer {
     flex-direction: column;
     gap: 16px;
@@ -1071,13 +1082,11 @@
   }
 }
 
-@media (max-width: 992px) {
-  .main-content {
-    margin-left: 200px;
-  }
+@media (max-width: 992px) and (min-width: 1025px) {
+  /* Layout.css handles margin-left, no need to set it here */
   
   .dashboard-content {
-    padding: 90px 20px 20px 20px;
+    padding: 24px 20px 20px 20px; /* Professional spacing */
   }
   
   .welcome-title {
@@ -1116,14 +1125,20 @@
 }
 
 @media (max-width: 768px) {
- .main-content {
-    margin-left: 0;
+  /* Mobile: Already handled by ≤1024px media query above */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
     height: auto;
     overflow: visible;
   }
-
   
+  .dashboard-container {
+    display: block;
+  }
+
   .dashboard-content {
+    padding: 24px 16px 16px 16px; /* Professional spacing */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* smooth iOS scroll */
   }
@@ -1207,15 +1222,15 @@
   }
   
   .navbar {
-    left: 0;
-    width: 100vw;
+    left: 0 !important;
+    width: 100% !important;
     padding: 0 20px;
   }
 }
 
 @media (max-width: 576px) {
   .dashboard-content {
-    padding: 80px 12px 12px 12px;
+    padding: 24px 12px 12px 12px; /* Professional spacing */
   }
   
   .welcome-title {
@@ -1508,6 +1523,7 @@
   /* Alerts section */
   .alerts-section {
     margin-bottom: 20px;
+    margin-top: 30px;
   }
 }
 
@@ -1515,7 +1531,7 @@
 @media (max-width: 480px) {
   .dashboard-content {
     padding: 12px;
-    margin-top: 64px;
+    margin-top: 2px;
   }
   
   .welcome-title {

@@ -1,0 +1,70 @@
+/* Layout.css */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-layout-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  transition: margin-left 0.3s ease;
+}
+
+.page-content {
+  flex: 1;
+  padding: 0;
+  margin-top: 79px; /* Account for fixed navbar */
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* Tablet/iPad and Mobile styles (≤1024px) - Sidebar as overlay */
+@media (max-width: 1024px) {
+  /* Remove flex layout so sidebar doesn't reserve space */
+  .admin-layout {
+    display: block;
+  }
+
+  /* Main content always full width */
+  .main-layout-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    flex: none;
+  }
+
+  .page-content {
+    margin-top: 64px;
+    width: 100%;
+  }
+}
+
+/* Desktop styles (≥1025px) - Sidebar in flex layout */
+@media (min-width: 1025px) {
+  .admin-layout {
+    display: flex;
+  }
+
+  .main-layout-content {
+    margin-left: 241px; /* Sidebar width */
+    width: calc(100% - 241px);
+    margin-top: -80px;
+  }
+}

@@ -1,17 +1,26 @@
-import React, { useState } from "react";
-import Sidebar from "../../components/Sidebar/Sidebar";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import "./Testimonials.css";
+import {
+  getAllTestimonials,
+  createTestimonial,
+  deleteTestimonial,
+} from "../../apis/testimonials";
 
 const Testimonials: React.FC = () => {
-  const [checkedRows, setCheckedRows] = useState<number[]>([0, 2, 4]);
+  const [checkedRows, setCheckedRows] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalTestimonials, setTotalTestimonials] = useState(0);
   const [newTestimonial, setNewTestimonial] = useState({
     firstName: "",
     lastName: "",
-    feedback:
-      "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+    feedback: "",
     photo: null as File | null,
   });
   const [sortConfig, setSortConfig] = useState<{
@@ -22,80 +31,43 @@ const Testimonials: React.FC = () => {
     order: null,
   });
 
-  const totalPages = 10;
+  // Fetch testimonials on component mount and when page/search changes
+  useEffect(() => {
+    fetchTestimonials();
+  }, [currentPage, searchQuery]);
 
-  const testimonials = [
-    {
-      id: 1,
-      clientName: "Riya Patil",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user1.jpg",
-    },
-    {
-      id: 2,
-      clientName: "Rajesh Patil",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user2.jpg",
-    },
-    {
-      id: 3,
-      clientName: "Rakesh Shetty",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user3.jpg",
-    },
-    {
-      id: 4,
-      clientName: "Kiran More",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user4.jpg",
-    },
-    {
-      id: 5,
-      clientName: "Sunita Shah",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user5.jpg",
-    },
-    {
-      id: 6,
-      clientName: "Riya Patil",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user1.jpg",
-    },
-    {
-      id: 7,
-      clientName: "Rajesh Patil",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user2.jpg",
-    },
-    {
-      id: 8,
-      clientName: "Rakesh Shetty",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user3.jpg",
-    },
-    {
-      id: 9,
-      clientName: "Kiran More",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user4.jpg",
-    },
-    {
-      id: 10,
-      clientName: "Sunita Shah",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
-      photo: "/user5.jpg",
-    },
-  ];
+  const fetchTestimonials = async () => {
+    setIsLoading(true);
+    try {
+      const result = await getAllTestimonials({
+        page: currentPage,
+        limit: 20,
+        search: searchQuery || undefined,
+      });
+
+      if (result.success && result.data) {
+        // Map backend data to frontend format
+        const mappedTestimonials = result.data.testimonials.map((item: any) => ({
+          id: item.id,
+          clientName: `${item.first_name} ${item.last_name}`,
+          firstName: item.first_name,
+          lastName: item.last_name,
+          feedback: item.feedback,
+          photo: item.image_url || null,
+          createdAt: item.createdAt,
+        }));
+
+        setTestimonials(mappedTestimonials);
+        setTotalPages(result.data.pagination?.totalPages || 1);
+        setTotalTestimonials(result.data.pagination?.total || 0);
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch testimonials:", error);
+      toast.error(error.message || "Failed to fetch testimonials");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRows((prev) => {
@@ -108,7 +80,7 @@ const Testimonials: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (checkedRows.length === testimonials.length) {
+    if (checkedRows.length === testimonials.length && testimonials.length > 0) {
       setCheckedRows([]);
     } else {
       setCheckedRows(testimonials.map((_, index) => index));
@@ -123,6 +95,8 @@ const Testimonials: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    // Reset to page 1 when search changes
+    setCurrentPage(1);
   };
 
   const handleOpenAddModal = () => {
@@ -134,8 +108,7 @@ const Testimonials: React.FC = () => {
     setNewTestimonial({
       firstName: "",
       lastName: "",
-      feedback:
-        "The care I received was exceptional. My chronic back pain has significantly improved after treatment. Highly recommended!",
+      feedback: "",
       photo: null,
     });
   };
@@ -159,11 +132,59 @@ const Testimonials: React.FC = () => {
     }
   };
 
-  const handleSubmitTestimonial = (e: React.FormEvent) => {
+  const handleSubmitTestimonial = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("New testimonial:", newTestimonial);
-    // Here you would typically send the data to your backend
-    handleCloseAddModal();
+    setIsSubmitting(true);
+
+    try {
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      formData.append("first_name", newTestimonial.firstName.trim());
+      formData.append("last_name", newTestimonial.lastName.trim());
+      formData.append("feedback", newTestimonial.feedback.trim());
+      
+      if (newTestimonial.photo) {
+        formData.append("image", newTestimonial.photo);
+      }
+
+      const result = await createTestimonial(formData);
+
+      if (result.success) {
+        toast.success("Testimonial added successfully!");
+        handleCloseAddModal();
+        // Refresh testimonials list
+        fetchTestimonials();
+      } else {
+        toast.error(result.message || "Failed to add testimonial");
+      }
+    } catch (error: any) {
+      console.error("Failed to create testimonial:", error);
+      toast.error(error.message || "Failed to add testimonial");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteTestimonial = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this testimonial?")) {
+      return;
+    }
+
+    try {
+      const result = await deleteTestimonial(id);
+      if (result.success) {
+        toast.success("Testimonial deleted successfully!");
+        // Refresh testimonials list
+        fetchTestimonials();
+        // Clear checked rows if deleted item was checked
+        setCheckedRows([]);
+      } else {
+        toast.error(result.message || "Failed to delete testimonial");
+      }
+    } catch (error: any) {
+      console.error("Failed to delete testimonial:", error);
+      toast.error(error.message || "Failed to delete testimonial");
+    }
   };
 
   const handleSort = (column: string) => {
@@ -180,19 +201,8 @@ const Testimonials: React.FC = () => {
     });
   };
 
-  // Filter testimonials based on search query
-  const filteredTestimonials = testimonials.filter((testimonial) => {
-    const matchesSearch =
-      testimonial.clientName
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      testimonial.feedback.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesSearch;
-  });
-
-  // Sort testimonials based on sortConfig
-  const sortedTestimonials = [...filteredTestimonials].sort((a, b) => {
+  // Sort testimonials based on sortConfig (client-side sorting)
+  const sortedTestimonials = [...testimonials].sort((a, b) => {
     if (!sortConfig.order) return 0;
 
     const aValue = a[sortConfig.column as keyof typeof a];
@@ -209,7 +219,6 @@ const Testimonials: React.FC = () => {
 
   return (
     <div className="testimonials-container">
-      <Sidebar />
       <div className="main-content">
         <div className="testimonials-content">
           {/* Header Section */}
@@ -332,83 +341,108 @@ const Testimonials: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedTestimonials.map(
-                      (
-                        testimonial,
-                        index // Change filteredTestimonials to sortedTestimonials
-                      ) => (
-                        <tr key={testimonial.id}>
-                          <td>
-                            <div className="checkbox-cell">
-                              <div
-                                className={`custom-checkbox ${
-                                  checkedRows.includes(index) ? "checked" : ""
-                                }`}
-                                onClick={() => handleCheckboxChange(index)}
-                              >
-                                <span className="checkmark">✓</span>
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: "center", padding: "2rem" }}>
+                          Loading testimonials...
+                        </td>
+                      </tr>
+                    ) : sortedTestimonials.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: "center", padding: "2rem" }}>
+                          No testimonials found
+                        </td>
+                      </tr>
+                    ) : (
+                      sortedTestimonials.map((testimonial, index) => {
+                        // Get base URL for image
+                        const BASE_URL =
+                          process.env.REACT_APP_BASE_URL ||
+                          "http://localhost:80/Clinic_Website_Backend_PHP-main";
+                        const imageUrl = testimonial.photo
+                          ? testimonial.photo.startsWith("http")
+                            ? testimonial.photo
+                            : `${BASE_URL}${testimonial.photo}`
+                          : null;
+
+                        return (
+                          <tr key={testimonial.id}>
+                            <td>
+                              <div className="checkbox-cell">
+                                <div
+                                  className={`custom-checkbox ${
+                                    checkedRows.includes(index) ? "checked" : ""
+                                  }`}
+                                  onClick={() => handleCheckboxChange(index)}
+                                >
+                                  <span className="checkmark">✓</span>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="client-info">
-                              <div className="client-avatar">
-                                {testimonial.photo ? (
+                            </td>
+                            <td>
+                              <div className="client-info">
+                                <div className="client-avatar">
+                                  {imageUrl ? (
+                                    <img
+                                      src={imageUrl}
+                                      alt={testimonial.clientName}
+                                      className="client-photo"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        target.style.display = "none";
+                                        const fallback =
+                                          document.createElement("div");
+                                        fallback.className =
+                                          "client-photo-fallback";
+                                        fallback.textContent =
+                                          testimonial.clientName.charAt(0);
+                                        target.parentNode?.appendChild(fallback);
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="client-photo-fallback">
+                                      {testimonial.clientName.charAt(0)}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="client-name">
+                                  {testimonial.clientName}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="feedback-text">
+                                "{testimonial.feedback}"
+                              </div>
+                            </td>
+                            <td>
+                              <div className="testimonial-actions-container">
+                                <button
+                                  className="delete-btn"
+                                  title="Delete"
+                                  onClick={() => handleDeleteTestimonial(testimonial.id)}
+                                >
                                   <img
-                                    src={testimonial.photo}
-                                    alt={testimonial.clientName}
-                                    className="client-photo"
+                                    src="/delete.svg"
+                                    alt="Delete"
+                                    className="delete-icon"
                                     onError={(e) => {
-                                      const target =
-                                        e.target as HTMLImageElement;
+                                      const target = e.target as HTMLImageElement;
                                       target.style.display = "none";
                                       const fallback =
-                                        document.createElement("div");
-                                      fallback.className =
-                                        "client-photo-fallback";
-                                      fallback.textContent =
-                                        testimonial.clientName.charAt(0);
+                                        document.createElement("span");
+                                      fallback.className = "delete-icon-fallback";
+                                      fallback.textContent = "🗑️";
                                       target.parentNode?.appendChild(fallback);
                                     }}
                                   />
-                                ) : (
-                                  <div className="client-photo-fallback">
-                                    {testimonial.clientName.charAt(0)}
-                                  </div>
-                                )}
+                                </button>
                               </div>
-                              <div className="client-name">
-                                {testimonial.clientName}
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="feedback-text">
-                              "{testimonial.feedback}"
-                            </div>
-                          </td>
-                          <td>
-                            <div className="testimonial-actions-container">
-                              <button className="delete-btn" title="Delete">
-                                <img
-                                  src="/delete.svg"
-                                  alt="Delete"
-                                  className="delete-icon"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = "none";
-                                    const fallback =
-                                      document.createElement("span");
-                                    fallback.className = "delete-icon-fallback";
-                                    fallback.textContent = "🗑️";
-                                    target.parentNode?.appendChild(fallback);
-                                  }}
-                                />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -417,52 +451,62 @@ const Testimonials: React.FC = () => {
 
             {/* Table Footer */}
             <div className="table-footer">
-              <div className="pagination-info">Showing 1 - 10 out of 233</div>
+              <div className="pagination-info">
+                Showing{" "}
+                {totalTestimonials > 0
+                  ? (currentPage - 1) * 20 + 1
+                  : 0}{" "}
+                - {Math.min(currentPage * 20, totalTestimonials)} out of{" "}
+                {totalTestimonials}
+              </div>
               <div className="pagination-controls">
                 <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || isLoading}
                 >
                   ← Previous
                 </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 1 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(1)}
-                >
-                  1
-                </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 2 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(2)}
-                >
-                  2
-                </button>
-                <span className="pagination-ellipsis">...</span>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 9 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(9)}
-                >
-                  9
-                </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 10 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(10)}
-                >
-                  10
-                </button>
+                {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 10) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 4) {
+                    pageNum = totalPages - 9 + i;
+                  } else {
+                    pageNum = currentPage - 5 + i;
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      className={`pagination-btn ${
+                        currentPage === pageNum ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                {totalPages > 10 && currentPage < totalPages - 4 && (
+                  <span className="pagination-ellipsis">...</span>
+                )}
+                {totalPages > 10 && currentPage < totalPages - 4 && (
+                  <button
+                    className={`pagination-btn ${
+                      currentPage === totalPages ? "active" : ""
+                    }`}
+                    onClick={() => handlePageChange(totalPages)}
+                  >
+                    {totalPages}
+                  </button>
+                )}
                 <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || isLoading}
                 >
                   Next →
                 </button>
@@ -555,11 +599,16 @@ const Testimonials: React.FC = () => {
                   type="button"
                   className="cancel-btn"
                   onClick={handleCloseAddModal}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">
-                  Add Testimonials
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Adding..." : "Add Testimonials"}
                 </button>
               </div>
             </form>

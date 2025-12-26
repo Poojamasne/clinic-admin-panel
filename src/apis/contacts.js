@@ -13,6 +13,7 @@ import apiClient from './axios';
  * @param {string} [params.status] - Filter by status (unread, read)
  * @param {string} [params.responded] - Filter by responded status (0 or 1)
  * @param {string} [params.search] - Search query
+ * @param {string} [params.date_filter] - Filter by date (today, yesterday, this_month, this_year)
  * @param {string} [params.sort_by=createdAt] - Sort field
  * @param {string} [params.sort_order=DESC] - Sort order (ASC/DESC)
  * @returns {Promise} Response with contacts and pagination
@@ -28,6 +29,7 @@ export const getAllContacts = async (params = {}) => {
       queryParams.append('responded', params.responded);
     }
     if (params.search) queryParams.append('search', params.search);
+    if (params.date_filter) queryParams.append('date_filter', params.date_filter);
     if (params.sort_by) queryParams.append('sort_by', params.sort_by);
     if (params.sort_order) queryParams.append('sort_order', params.sort_order);
 
@@ -93,6 +95,20 @@ export const markAsRead = async (id) => {
 export const getUnreadCount = async () => {
   try {
     const response = await apiClient.get('/api/contact/admin/unread-count');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Delete a contact
+ * @param {string} id - Contact ID
+ * @returns {Promise} Response indicating success
+ */
+export const deleteContact = async (id) => {
+  try {
+    const response = await apiClient.delete(`/api/contact/admin/${id}`);
     return response.data;
   } catch (error) {
     throw error;

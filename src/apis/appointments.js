@@ -11,8 +11,12 @@ import apiClient from './axios';
  * @param {number} [params.page=1] - Page number
  * @param {number} [params.limit=20] - Items per page
  * @param {string} [params.status] - Filter by status (confirmed, tentative, pending, cancelled, completed)
- * @param {string} [params.date_from] - Filter from date (YYYY-MM-DD)
- * @param {string} [params.date_to] - Filter to date (YYYY-MM-DD)
+ * @param {string} [params.date_filter] - Date filter type (all, today, tomorrow, yesterday, this_week, last_week, this_month, last_month, this_year, custom_date, custom_range)
+ * @param {string} [params.date] - Date for custom_date filter (YYYY-MM-DD)
+ * @param {string} [params.from_date] - Start date for custom_range filter (YYYY-MM-DD)
+ * @param {string} [params.to_date] - End date for custom_range filter (YYYY-MM-DD)
+ * @param {string} [params.date_from] - Legacy: Filter from date (YYYY-MM-DD)
+ * @param {string} [params.date_to] - Legacy: Filter to date (YYYY-MM-DD)
  * @param {string} [params.search] - Search query
  * @param {string} [params.sort_by=date] - Sort field
  * @param {string} [params.sort_order=DESC] - Sort order (ASC/DESC)
@@ -25,6 +29,11 @@ export const getAllAppointments = async (params = {}) => {
     if (params.page) queryParams.append('page', params.page);
     if (params.limit) queryParams.append('limit', params.limit);
     if (params.status) queryParams.append('status', params.status);
+    if (params.date_filter) queryParams.append('date_filter', params.date_filter);
+    if (params.date) queryParams.append('date', params.date);
+    if (params.from_date) queryParams.append('from_date', params.from_date);
+    if (params.to_date) queryParams.append('to_date', params.to_date);
+    // Legacy support
     if (params.date_from) queryParams.append('date_from', params.date_from);
     if (params.date_to) queryParams.append('date_to', params.date_to);
     if (params.search) queryParams.append('search', params.search);

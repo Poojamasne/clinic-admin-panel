@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { getAllAppointments, deleteAppointment } from "../../apis/appointments";
 import "./Appointments.css";
 
 const Appointments: React.FC = () => {
@@ -7,8 +8,11 @@ const Appointments: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [timeFilter, setTimeFilter] = useState<string>("Last Week");
-  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const [dateFilter, setDateFilter] = useState<string>("today");
+  const [showDateDropdown, setShowDateDropdown] = useState(false);
+  const [customDate, setCustomDate] = useState<string>("");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
   const [sortConfig, setSortConfig] = useState<{
     column: string;
     order: "asc" | "desc" | null;
@@ -17,19 +21,10 @@ const Appointments: React.FC = () => {
     order: null,
   });
 
-  const totalPages = 10;
-
-  // const appointments = [
-  //   {
-  //     patient: "Riya Patil",
-  //     email: "riya.p@sumago.com",
-  //     doctor: "Dr. Nitin Darda",
-  //     date: "2024-12-06",
-  //     time: "09:00 AM",
-  //     type: "Spine Treatments",
-  //     phone: "9867523490",
-  //     status: "Confirmed",
-  //   },
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalAppointments, setTotalAppointments] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   //   {
   //     patient: "Rajesh Patil",
   //     email: "showtraders@yahoo.com",
@@ -73,12 +68,22 @@ const Appointments: React.FC = () => {
   // ];
 
   // Status options for dropdown
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const statusOptions = ["All Status", "Confirmed", "Pending"];
 
-  const statusOptions = ["All Status", "Confirmed", "Pending", "Cancelled"];
-
-  // Time filter options
-  const timeOptions = ["Last Week", "Last Month", "Last Year"];
+  // Date filter options
+  const dateFilterOptions = [
+    { value: "all", label: "All Time" },
+    { value: "today", label: "Today" },
+    { value: "tomorrow", label: "Tomorrow" },
+    { value: "yesterday", label: "Yesterday" },
+    { value: "this_week", label: "This Week" },
+    { value: "last_week", label: "Last Week" },
+    { value: "this_month", label: "This Month" },
+    { value: "last_month", label: "Last Month" },
+    { value: "this_year", label: "This Year" },
+    { value: "custom_date", label: "Custom Date" },
+    { value: "custom_range", label: "Custom Range" },
+  ];
 
   const handleCheckboxChange = (index: number) => {
     setCheckedRows((prev) => {
@@ -104,6 +109,30 @@ const Appointments: React.FC = () => {
     }
   };
 
+  const handleDeleteAppointment = async (id: string, index: number) => {
+    if (!window.confirm("Are you sure you want to delete this appointment?")) {
+      return;
+    }
+
+    try {
+      const result = await deleteAppointment(id);
+      if (result.success) {
+        // Remove from local state immediately
+        setAppointments((prev) => prev.filter((app) => app.id !== id));
+        // Remove from checked rows if present
+        setCheckedRows((prev) => prev.filter((i) => i !== index));
+        // Update total count
+        setTotalAppointments((prev) => Math.max(0, prev - 1));
+        toast.success("Appointment deleted successfully!");
+      } else {
+        toast.error(result.message || "Failed to delete appointment");
+      }
+    } catch (error: any) {
+      console.error("Delete appointment error:", error);
+      toast.error(error.message || "Failed to delete appointment");
+    }
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -114,9 +143,19 @@ const Appointments: React.FC = () => {
     setStatusFilter(e.target.value);
   };
 
-  const handleTimeFilterChange = (option: string) => {
-    setTimeFilter(option);
-    setShowTimeDropdown(false);
+  const handleDateFilterChange = (value: string) => {
+    setDateFilter(value);
+    setShowDateDropdown(false);
+    // Reset custom date inputs when filter changes
+    if (value !== "custom_date") {
+      setCustomDate("");
+    }
+    if (value !== "custom_range") {
+      setFromDate("");
+      setToDate("");
+    }
+    // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
   const handleSort = (column: string) => {
@@ -165,52 +204,74 @@ const Appointments: React.FC = () => {
   });
 
   useEffect(() => {
-  const fetchAppointments = async () => {
-    try {
-      const token = localStorage.getItem("adminToken");
+    const fetchAppointments = async () => {
+      setIsLoading(true);
+      try {
+        const status =
+          statusFilter !== "All Status" ? statusFilter.toLowerCase() : "";
 
-      const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/appointments/admin`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        // Build date filter params
+        const dateFilterParams: any = {
+          date_filter: dateFilter,
+        };
+
+        if (dateFilter === "custom_date" && customDate) {
+          dateFilterParams.date = customDate;
+        } else if (dateFilter === "custom_range" && fromDate && toDate) {
+          dateFilterParams.from_date = fromDate;
+          dateFilterParams.to_date = toDate;
         }
-      );
 
-      const result = await response.json();
+        const result = await getAllAppointments({
+          page: currentPage,
+          limit: 20,
+          status: status,
+          search: searchQuery,
+          sort_by: "date",
+          sort_order: "DESC",
+          ...dateFilterParams,
+        });
 
-      if (result.success) {
-        
-        const mappedData = Array.isArray(result.data)
-  ? result.data.map((item: any) => ({
-      patient: item.patient_name,
-      email: item.patient_email,
-      doctor: item.doctor_name,
-      date: item.appointment_date,
-      time: item.appointment_time,
-      type: item.treatment_type,
-      phone: item.patient_phone,
-      status: item.status,
-    }))
-  : [];
+        if (result.success && result.data) {
+          // Map API response to frontend format
+          const mappedData = Array.isArray(result.data.appointments)
+            ? result.data.appointments.map((item: any) => ({
+                id: item.id,
+                patient: item.name,
+                email: item.email,
+                doctor: "Dr. Nitin Darda", // Default doctor name (can be updated if API provides it)
+                date: item.date,
+                time: item.time,
+                type: item.service,
+                phone: item.phone,
+                status: item.status
+                  ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+                  : "Pending",
+                notes: item.notes || "",
+                amount: item.amount || "0.00",
+                is_paid: item.is_paid || 0,
+              }))
+            : [];
 
+          setAppointments(mappedData);
 
-
-        setAppointments(mappedData);
-      } else {
-        console.error("Failed to fetch appointments");
+          // Update pagination
+          if (result.data.pagination) {
+            setTotalPages(result.data.pagination.totalPages || 1);
+            setTotalAppointments(result.data.pagination.total || 0);
+          }
+        } else {
+          console.error("Failed to fetch appointments:", result.message);
+        }
+      } catch (error: any) {
+        console.error("Appointments API error:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Appointments API error:", error);
-    }
-  };
+    };
 
-  fetchAppointments();
-}, []);
-
+    fetchAppointments();
+  }, [currentPage, statusFilter, searchQuery, dateFilter, customDate, fromDate, toDate]);
 
   return (
     <div className="appointments-container">
@@ -228,7 +289,7 @@ const Appointments: React.FC = () => {
               <div className="time-filter-container">
                 <button
                   className="time-filter-btn"
-                  onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                  onClick={() => setShowDateDropdown(!showDateDropdown)}
                 >
                   <div className="time-filter-content">
                     <img
@@ -244,26 +305,96 @@ const Appointments: React.FC = () => {
                         target.parentNode?.appendChild(fallback);
                       }}
                     />
-                    <span className="time-filter-text">{timeFilter}</span>
+                    <span className="time-filter-text">
+                      {dateFilterOptions.find((opt) => opt.value === dateFilter)?.label || "Today"}
+                    </span>
                     <span className="dropdown-arrow">▼</span>
                   </div>
                 </button>
-                {showTimeDropdown && (
+                {showDateDropdown && (
                   <div className="time-filter-dropdown">
-                    {timeOptions.map((option) => (
+                    {dateFilterOptions.map((option) => (
                       <button
-                        key={option}
+                        key={option.value}
                         className={`time-filter-option ${
-                          timeFilter === option ? "selected" : ""
+                          dateFilter === option.value ? "selected" : ""
                         }`}
-                        onClick={() => handleTimeFilterChange(option)}
+                        onClick={() => handleDateFilterChange(option.value)}
                       >
-                        {option}
+                        {option.label}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
+              {/* Custom Date Input */}
+              {dateFilter === "custom_date" && (
+                <div style={{ marginTop: "10px", marginLeft: "20px" }}>
+                  <input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => setCustomDate(e.target.value)}
+                    style={{
+                      padding: "8px",
+                      borderRadius: "4px",
+                      border: "1px solid #ddd",
+                      fontSize: "14px",
+                    }}
+                  />
+                </div>
+              )}
+              {/* Custom Range Inputs */}
+              {dateFilter === "custom_range" && (
+                <div style={{ marginTop: "10px", marginLeft: "20px", display: "flex", gap: "10px" }}>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "12px" }}>
+                      From:
+                    </label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => {
+                        const newFromDate = e.target.value;
+                        setFromDate(newFromDate);
+                        // Validate: from_date should not be greater than to_date
+                        if (toDate && newFromDate > toDate) {
+                          toast.error("From date cannot be greater than To date");
+                        }
+                      }}
+                      style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "12px" }}>
+                      To:
+                    </label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => {
+                        const newToDate = e.target.value;
+                        setToDate(newToDate);
+                        // Validate: to_date should not be less than from_date
+                        if (fromDate && newToDate < fromDate) {
+                          toast.error("To date cannot be less than From date");
+                        }
+                      }}
+                      min={fromDate || undefined}
+                      style={{
+                        padding: "8px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -310,7 +441,7 @@ const Appointments: React.FC = () => {
                         target.style.display = "none";
                         const fallback = document.createElement("span");
                         fallback.className = "filter-icon-fallback";
-                        fallback.textContent = "⚙️";
+                        fallback.textContent = "";
                         target.parentNode?.appendChild(fallback);
                       }}
                     />
@@ -666,13 +797,28 @@ const Appointments: React.FC = () => {
                       <th>Active</th>
                     </tr>
                   </thead>
-                  {/* <tbody>
-                    {sortedAppointments.map(
-                      (
-                        appointment,
-                        index // Change filteredAppointments to sortedAppointments
-                      ) => (
-                        <tr key={index}>
+                  <tbody>
+                    {isLoading ? (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          style={{ textAlign: "center", padding: "2rem" }}
+                        >
+                          Loading appointments...
+                        </td>
+                      </tr>
+                    ) : appointments.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          style={{ textAlign: "center", padding: "2rem" }}
+                        >
+                          No appointments found
+                        </td>
+                      </tr>
+                    ) : (
+                      sortedAppointments.map((appointment, index) => (
+                        <tr key={appointment.id || index}>
                           <td>
                             <div className="checkbox-cell">
                               <div
@@ -714,7 +860,12 @@ const Appointments: React.FC = () => {
                                 alt="Delete"
                                 className="delete-action-icon"
                                 onClick={() => {
-                                  console.log("Delete appointment", index);
+                                  if (appointment.id) {
+                                    handleDeleteAppointment(
+                                      appointment.id,
+                                      index
+                                    );
+                                  }
                                 }}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
@@ -729,82 +880,72 @@ const Appointments: React.FC = () => {
                             </div>
                           </td>
                         </tr>
-                      )
+                      ))
                     )}
-                  </tbody> */}
-                  <tbody>
-  {appointments.length === 0 ? (
-    <tr>
-      <td colSpan={6} style={{ textAlign: "center" }}>
-        No appointments found
-      </td>
-    </tr>
-  ) : (
-    appointments.map((item, index) => (
-      <tr key={item.id || index}>
-        <td>{item.patient}</td>
-        <td>{item.email}</td>
-        <td>{item.phone}</td>
-        <td>{item.service}</td>
-        <td>{item.date}</td>
-        <td>{item.status}</td>
-      </tr>
-    ))
-  )}
-</tbody>
-
+                  </tbody>
                 </table>
               </div>
             </div>
 
             {/* Table Footer */}
             <div className="table-footer">
-              <div className="pagination-info">Showing 1 - 10 out of 233</div>
+              <div className="pagination-info">
+                Showing{" "}
+                {appointments.length > 0 ? (currentPage - 1) * 20 + 1 : 0} -{" "}
+                {Math.min(currentPage * 20, totalAppointments)} out of{" "}
+                {totalAppointments}
+              </div>
               <div className="pagination-controls">
                 <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || isLoading}
                 >
                   ← Previous
                 </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 1 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(1)}
-                >
-                  1
-                </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 2 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(2)}
-                >
-                  2
-                </button>
-                <span className="pagination-ellipsis">...</span>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 9 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(9)}
-                >
-                  9
-                </button>
-                <button
-                  className={`pagination-btn ${
-                    currentPage === 10 ? "active" : ""
-                  }`}
-                  onClick={() => handlePageChange(10)}
-                >
-                  10
-                </button>
+                {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 10) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 4) {
+                    pageNum = totalPages - 9 + i;
+                  } else {
+                    pageNum = currentPage - 4 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      className={`pagination-btn ${
+                        currentPage === pageNum ? "active" : ""
+                      }`}
+                      onClick={() => handlePageChange(pageNum)}
+                      disabled={isLoading}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                {totalPages > 10 && currentPage < totalPages - 4 && (
+                  <span className="pagination-ellipsis">...</span>
+                )}
+                {totalPages > 10 && currentPage < totalPages - 4 && (
+                  <button
+                    className={`pagination-btn ${
+                      currentPage === totalPages ? "active" : ""
+                    }`}
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={isLoading}
+                  >
+                    {totalPages}
+                  </button>
+                )}
                 <button
                   className="pagination-btn"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
+                  disabled={currentPage === totalPages || isLoading}
                 >
                   Next →
                 </button>
