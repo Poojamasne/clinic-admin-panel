@@ -550,6 +550,13 @@ const Testimonials: React.FC = () => {
                         {newTestimonial.photo.name}
                       </div>
                     )}
+
+                    {/* ✅ ADD THIS BELOW */}
+    <div className="upload-guidelines">
+      Supported formats: JPG, JPEG, PNG, WEBP<br />
+      Maximum file size: 2 MB
+    </div>
+ 
                   </div>
                 </div>
               </div>

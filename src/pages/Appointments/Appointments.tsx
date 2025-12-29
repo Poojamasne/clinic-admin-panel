@@ -986,7 +986,7 @@ const Appointments: React.FC = () => {
                           </span>
                         </div>
                       </th>
-                      <th>Active</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
